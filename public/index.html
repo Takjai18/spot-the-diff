@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>🔍 眼明手快找不同 — 多風格連線破冰遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <style>
+    :root {
+      --bg-page: #FFFDF0;
+      --bg-pattern: radial-gradient(rgba(17, 17, 17, 0.08) 1.5px, transparent 1.5px);
+      --bg-surface: #FFFFFF;
+      --accent-yellow: #FFE500;
+      --accent-coral: #FF4D4D;
+      --accent-cobalt: #2563EB;
+      --accent-mint: #22C55E;
+      --accent-purple: #A855F7;
+      --ink-black: #111111;
+      --text-primary: #111111;
+      --text-muted: #404040;
+      --border-thick: 3px solid #111111;
+      --radius-card: 16px;
+      --radius-btn: 12px;
+      --shadow-hard: 5px 5px 0 #111111;
+      --shadow-hard-sm: 3px 3px 0 #111111;
+      --font-display: 'Noto Sans TC', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+      --font-body: 'Noto Sans TC', 'PingFang HK', 'Microsoft JhengHei', sans-serif;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; min-height: 100vh; font-family: var(--font-body); color: var(--text-primary);
+      background-color: var(--bg-page); background-image: var(--bg-pattern); background-size: 18px 18px;
+      overflow-x: hidden;
+    }
+    .navbar {
+      position: sticky; top: 0; z-index: 50; display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 10px; padding: 10px 16px; background: #FFFFFF;
+      border-bottom: 3px solid var(--ink-black);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 1.25rem; }
+    .brand-badge {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--accent-yellow);
+      border: 3px solid var(--ink-black); border-radius: 10px; box-shadow: 3px 3px 0 var(--ink-black);
+      transform: rotate(-1.2deg);
+    }
+    .room-pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; background: var(--accent-cobalt);
+      color: #FFFFFF; border: 2.5px solid var(--ink-black); border-radius: 9999px;
+      font-size: 0.85rem; font-weight: 900; font-variant-numeric: tabular-nums;
+    }
+    .nav-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px;
+      padding: 7px 13px; font-family: inherit; font-size: 0.9rem; font-weight: 900; color: var(--ink-black);
+      background: #FFFFFF; border: 2.5px solid var(--ink-black); border-radius: var(--radius-btn);
+      box-shadow: var(--shadow-hard-sm); cursor: pointer; transition: transform 0.08s ease, box-shadow 0.08s ease;
+      user-select: none;
+    }
+    .btn:hover:not(:disabled) { transform: translate(1.5px, 1.5px); box-shadow: 1.5px 1.5px 0 var(--ink-black); }
+    .btn:active:not(:disabled) { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--ink-black); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-coral { background: var(--accent-coral); color: #FFFFFF; }
+    .btn-cobalt { background: var(--accent-cobalt); color: #FFFFFF; }
+    .btn-mint { background: var(--accent-mint); color: #111111; }
+    .btn-yellow { background: var(--accent-yellow); color: #111111; }
+    .btn-purple { background: var(--accent-purple); color: #FFFFFF; }
+    .btn-dark { background: var(--ink-black); color: var(--accent-yellow); }
+    .btn-lg { min-height: 52px; padding: 12px 22px; font-size: 1.08rem; border-width: 3px; box-shadow: var(--shadow-hard); }
+    .container { max-width: 1280px; margin: 0 auto; padding: 18px 16px 40px; }
+    .card {
+      background: var(--bg-surface); border: var(--border-thick); border-radius: var(--radius-card);
+      box-shadow: var(--shadow-hard); padding: 20px;
+    }
+    .comic-ribbon {
+      display: inline-block; padding: 6px 16px; background: var(--accent-yellow);
+      border: 3px solid var(--ink-black); box-shadow: 4px 4px 0 var(--ink-black);
+      font-weight: 900; font-size: 1.1rem; transform: rotate(-1.2deg); margin-bottom: 14px;
+    }
+    .hidden { display: none !important; }
+    .tabular { font-variant-numeric: tabular-nums; }
+    .hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 16px; }
+    .role-card { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; }
+    .role-icon { font-size: 2.5rem; line-height: 1; }
+    .role-title { margin: 0; font-size: 1.35rem; font-weight: 900; }
+    .role-desc { margin: 0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
+    .input-field {
+      width: 100%; min-height: 44px; padding: 9px 12px; font-family: inherit; font-size: 1rem; font-weight: 700;
+      color: var(--ink-black); background: #FFFDF0; border: 2.5px solid var(--ink-black); border-radius: 10px; outline: none;
+    }
+    .input-field:focus { background: #FFFFFF; box-shadow: 0 0 0 3px var(--accent-yellow); }
+    .team-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .team-chip {
+      padding: 8px 6px; border: 2.5px solid var(--ink-black); border-radius: 10px;
+      font-weight: 900; font-size: 0.85rem; text-align: center; cursor: pointer; background: #FFFFFF;
+    }
+    .team-chip.active { box-shadow: 3px 3px 0 var(--ink-black); transform: translate(-1px, -1px); }
+    .team-chip[data-team="red"].active { background: #FF4D4D; color: #FFFFFF; }
+    .team-chip[data-team="blue"].active { background: #2563EB; color: #FFFFFF; }
+    .team-chip[data-team="yellow"].active { background: #FFE500; color: #111111; }
+    .team-chip[data-team="green"].active { background: #22C55E; color: #111111; }
+    .lobby-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 18px; }
+    @media (max-width: 860px) { .lobby-grid { grid-template-columns: 1fr; } }
+    .room-code-big {
+      font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 900; letter-spacing: 0.14em; padding: 10px 20px;
+      background: var(--accent-yellow); border: 3px solid var(--ink-black); border-radius: 14px;
+      box-shadow: 4px 4px 0 var(--ink-black); display: inline-block;
+    }
+    .player-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .player-chip {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+      border: 2.5px solid var(--ink-black); border-radius: 9999px; font-weight: 900; font-size: 0.9rem;
+      background: #FFFFFF; box-shadow: 2px 2px 0 var(--ink-black);
+    }
+    .dot-team { width: 11px; height: 11px; border-radius: 50%; border: 2px solid #111111; display: inline-block; }
+    .hud-bar {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 12px 16px; background: #FFFFFF; border: 3px solid var(--ink-black); border-radius: 14px;
+      box-shadow: 4px 4px 0 var(--ink-black); margin-bottom: 14px;
+    }
+    .hud-stat { display: inline-flex; align-items: center; gap: 8px; font-weight: 900; font-size: 1rem; }
+    .timer-pill {
+      padding: 6px 16px; border: 3px solid var(--ink-black); border-radius: 10px;
+      background: var(--accent-yellow); font-size: 1.3rem; font-weight: 900; min-width: 92px; text-align: center;
+    }
+    .timer-pill.urgent { background: var(--accent-coral); color: #FFFFFF; animation: pulseUrgent 0.6s infinite alternate; }
+    @keyframes pulseUrgent { from { transform: scale(1); } to { transform: scale(1.06); } }
+    .diff-badge { padding: 4px 10px; border: 2px solid var(--ink-black); border-radius: 8px; font-size: 0.82rem; font-weight: 900; background: #E0F2FE; }
+    .diff-badge.hard { background: #FECACA; }
+    .diff-badge.nightmare { background: #111111; color: #FFE500; }
+    .stage-layout { display: grid; grid-template-columns: 1fr 290px; gap: 16px; align-items: start; }
+    @media (max-width: 1024px) { .stage-layout { grid-template-columns: 1fr; } }
+    .boards-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px) { .boards-pair { grid-template-columns: 1fr; gap: 10px; } }
+    .board-frame {
+      position: relative; background: #FFFFFF; border: 3.5px solid var(--ink-black); border-radius: 14px;
+      box-shadow: 5px 5px 0 var(--ink-black); overflow: hidden; touch-action: manipulation; cursor: crosshair;
+    }
+    .board-label {
+      position: absolute; top: 8px; left: 8px; z-index: 5; padding: 3px 10px;
+      font-size: 0.78rem; font-weight: 900; border: 2px solid var(--ink-black); border-radius: 8px; pointer-events: none;
+    }
+    .board-label.left { background: var(--accent-yellow); color: #111111; }
+    .board-label.right { background: var(--accent-coral); color: #FFFFFF; }
+    .board-svg { display: block; width: 100%; height: auto; user-select: none; }
+    .cooldown-banner {
+      position: absolute; inset: 0; z-index: 10; display: flex; align-items: center; justify-content: center;
+      background: rgba(255, 77, 77, 0.28); pointer-events: none; font-weight: 900; font-size: 1.25rem;
+      color: #FFFFFF; text-shadow: 2px 2px 0 #111111;
+    }
+    .sidebar-panel { display: flex; flex-direction: column; gap: 12px; }
+    .lb-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px;
+      border: 2.5px solid var(--ink-black); border-radius: 10px; background: #FFFDF0; font-weight: 900; font-size: 0.9rem;
+    }
+    .lb-row.me { background: var(--accent-yellow); }
+    .lb-row.finished { background: #DCFCE7; }
+    .progress-bar-bg { height: 10px; width: 100%; background: #E2E8F0; border: 2px solid var(--ink-black); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+    .progress-bar-fill { height: 100%; background: var(--accent-mint); transition: width 0.25s ease; }
+    .event-feed { max-height: 170px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; font-size: 0.84rem; }
+    .feed-item { padding: 6px 9px; border: 2px solid var(--ink-black); border-radius: 8px; background: #FFFFFF; font-weight: 700; }
+    .toast-stack { position: fixed; top: 72px; left: 50%; transform: translateX(-50%); z-index: 120; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast {
+      padding: 9px 18px; border: 3px solid var(--ink-black); border-radius: 12px; box-shadow: 4px 4px 0 var(--ink-black);
+      background: var(--accent-yellow); font-weight: 900; font-size: 0.98rem; text-align: center; animation: popIn 0.18s ease-out;
+    }
+    .toast.success { background: var(--accent-mint); color: #111111; }
+    .toast.error { background: var(--accent-coral); color: #FFFFFF; }
+    @keyframes popIn { from { opacity: 0; transform: translateY(-8px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 100; background: rgba(17, 17, 17, 0.62); display: flex; align-items: center; justify-content: center; padding: 16px; }
+    .modal-box {
+      width: 100%; max-width: 680px; max-height: 88vh; overflow-y: auto; background: #FFFFFF;
+      border: 3.5px solid var(--ink-black); border-radius: 18px; box-shadow: 8px 8px 0 var(--ink-black); padding: 20px;
+    }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 3px solid var(--ink-black); }
+    .modal-header h2 { margin: 0; font-size: 1.3rem; font-weight: 900; }
+    .scene-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(195px, 1fr)); gap: 10px; margin-top: 10px; }
+    .scene-option { padding: 10px; border: 2.5px solid var(--ink-black); border-radius: 12px; background: #FFFDF0; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+    .scene-option.selected { background: var(--accent-yellow); box-shadow: 3px 3px 0 var(--ink-black); }
+    .podium-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 18px 0; }
+    .podium-card { text-align: center; padding: 18px 14px; border: 3px solid var(--ink-black); border-radius: 16px; box-shadow: 5px 5px 0 var(--ink-black); background: #FFFFFF; }
+    .podium-card.rank-1 { background: var(--accent-yellow); }
+    .podium-card.rank-2 { background: #E0F2FE; }
+    .podium-card.rank-3 { background: #FED7AA; }
+    .checkered-bar {
+      height: 14px; border-top: 3px solid #111111; border-bottom: 3px solid #111111;
+      background: conic-gradient(#111111 90deg, #FFFFFF 90deg 180deg, #111111 180deg 270deg, #FFFFFF 270deg);
+      background-size: 16px 16px; margin: 14px 0;
+    }
+    .setting-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 2px dashed #CBD5E1; }
+    .seg-group { display: inline-flex; border: 2.5px solid var(--ink-black); border-radius: 10px; overflow: hidden; }
+    .seg-btn { padding: 7px 12px; border: none; border-right: 2px solid var(--ink-black); background: #FFFFFF; font-family: inherit; font-weight: 900; font-size: 0.86rem; cursor: pointer; }
+    .seg-btn:last-child { border-right: none; }
+    .seg-btn.active { background: var(--accent-yellow); }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-badge">🔍 眼明手快找不同</span>
+      <span id="nav-room-pill" class="room-pill hidden">房號：<span id="nav-room-code">----</span></span>
+      <span id="nav-conn-pill" class="diff-badge hidden">離線試玩</span>
+    </div>
+    <div class="nav-actions">
+      <button class="btn" id="btn-mute" title="開關音效">🔊</button>
+      <button class="btn btn-cobalt" id="btn-qr">📱 QR Code</button>
+      <button class="btn" id="btn-rules">📖 規則</button>
+      <button class="btn" id="btn-settings">⚙️ 設定/題庫</button>
+      <button class="btn btn-dark" id="btn-host-drawer">🛠️ 主持後台</button>
+      <button class="btn btn-coral" id="btn-restart">🔄 重開</button>
+    </div>
+  </nav>
+
+  <div id="toast-stack" class="toast-stack"></div>
+
+  <main class="container">
+    <section id="view-landing">
+      <div class="card">
+        <div class="comic-ribbon">⚡ 10 款多元畫風・手機即時連線搶答</div>
+        <h1 style="margin:0 0 8px; font-size:clamp(1.6rem, 3.2vw, 2.3rem); font-weight:900;">鬥快搵出兩幅圖嘅暗藏破綻！</h1>
+        <p style="margin:0; color:var(--text-muted); font-size:1rem; line-height:1.55;">
+          內置 <strong>10 關多元畫風</strong>（美式漫畫、8-Bit 像素、日系浮世繪、賽博夜市、復古天文台、科幻太空艙等），難度由入門 5 處去到地獄級 8 處！支援 <strong>⚡ 全場即時搶點</strong> 及 <strong>🏁 各自鬥快搵齊</strong> 兩種連線玩法。
+        </p>
+
+        <div class="hero-grid">
+          <div class="card role-card" style="background:#FFF8DC;">
+            <div>
+              <div class="role-icon">📺</div>
+              <h2 class="role-title">主持大螢幕開房</h2>
+              <p class="role-desc">喺電腦／投影機建立房間並顯示 QR Code，控制關卡、時間、雙模式切換與全場即時排行榜。</p>
+            </div>
+            <button class="btn btn-coral btn-lg" id="btn-create-room">🚀 建立新房間</button>
+          </div>
+
+          <div class="card role-card" style="background:#EFF6FF;">
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div class="role-icon">📱</div>
+              <h2 class="role-title">團友手機入房</h2>
+              <input class="input-field" id="join-room-input" placeholder="輸入 4 位房號（例：AB12）" maxlength="6" style="text-transform:uppercase;" />
+              <input class="input-field" id="join-name-input" placeholder="輸入你嘅暱稱（最多 12 字）" maxlength="12" />
+              <div id="join-team-wrap">
+                <div style="font-size:0.82rem; font-weight:900; margin-bottom:5px;">選擇所屬組別（分組模式用）：</div>
+                <div class="team-picker" id="join-team-picker">
+                  <button type="button" class="team-chip active" data-team="red">🔴 紅隊</button>
+                  <button type="button" class="team-chip" data-team="blue">🔵 藍隊</button>
+                  <button type="button" class="team-chip" data-team="yellow">🟡 黃隊</button>
+                  <button type="button" class="team-chip" data-team="green">🟢 綠隊</button>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-cobalt btn-lg" id="btn-join-room">⚡ 加入房間開戰</button>
+          </div>
+
+          <div class="card role-card" style="background:#F0FDF4;">
+            <div>
+              <div class="role-icon">🎮</div>
+              <h2 class="role-title">單機即時試玩／預覽</h2>
+              <p class="role-desc">無需連線後端即可即刻開局，逐關預覽全部 10 款畫風同測試點擊判定，亦可直接當投影主持版用。</p>
+            </div>
+            <button class="btn btn-mint btn-lg" id="btn-local-demo">🕹️ 即刻單機試玩</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-lobby" class="hidden">
+      <div class="lobby-grid">
+        <div class="card">
+          <div class="comic-ribbon">🏠 等候大堂</div>
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom:14px;">
+            <div>
+              <div style="font-size:0.85rem; font-weight:900; color:var(--text-muted); margin-bottom:4px;">房間號碼</div>
+              <div class="room-code-big tabular" id="lobby-room-code">----</div>
+            </div>
+            <div id="lobby-qr-mini" style="background:#FFFFFF; padding:8px; border:3px solid #111111; border-radius:12px;"></div>
+          </div>
+          <div id="lobby-mode-summary" style="padding:10px 12px; background:#FFF8DC; border:2.5px solid #111111; border-radius:10px; font-weight:700; font-size:0.92rem; line-height:1.5;"></div>
+          <div id="lobby-host-controls" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;">
+            <button class="btn btn-coral btn-lg" id="btn-start-game">🔥 正式開始遊戲！</button>
+            <button class="btn btn-yellow btn-lg" id="btn-open-settings-lobby">⚙️ 調整關數與模式</button>
+          </div>
+          <div id="lobby-player-wait" class="hidden" style="margin-top:16px; padding:12px; background:#E0F2FE; border:2.5px solid #111111; border-radius:10px; font-weight:900;">
+            ⏳ 已成功入房！等主持撳開始就會同步入關，準備好你隻手指！
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <h2 style="margin:0; font-size:1.2rem; font-weight:900;">👥 已入房團友（<span id="lobby-player-count" class="tabular">0</span>）</h2>
+          </div>
+          <div id="lobby-players-list" class="player-chips"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-playing" class="hidden">
+      <div class="hud-bar">
+        <div class="hud-stat">
+          <span class="diff-badge" id="hud-round-pill">第 1 / 6 關</span>
+          <span id="hud-scene-title" style="font-size:1.15rem;">港式茶餐廳</span>
+          <span class="diff-badge" id="hud-style-pill">美式漫畫</span>
+          <span class="diff-badge" id="hud-diff-pill">入門 ★☆☆</span>
+        </div>
+        <div class="hud-stat">
+          <span class="diff-badge" id="hud-mode-pill" style="background:var(--accent-yellow);">⚡ 全場搶點</span>
+          <span class="diff-badge tabular" id="hud-found-pill" style="background:#DCFCE7;">已搵 0 / 5</span>
+          <div class="timer-pill tabular" id="hud-timer">75s</div>
+        </div>
+      </div>
+
+      <div class="stage-layout">
+        <div>
+          <div class="boards-pair" id="boards-pair">
+            <div class="board-frame" id="board-left">
+              <span class="board-label left">原圖 A</span>
+              <svg id="svg-left" class="board-svg" viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div id="cooldown-left" class="cooldown-banner hidden">❌ 撳錯咗！冷卻中...</div>
+            </div>
+            <div class="board-frame" id="board-right">
+              <span class="board-label right">找不同 B</span>
+              <svg id="svg-right" class="board-svg" viewBox="0 0 360 260" xmlns="http://www.w3.org/2000/svg"></svg>
+              <div id="cooldown-right" class="cooldown-banner hidden">❌ 撳錯咗！冷卻中...</div>
+            </div>
+          </div>
+
+          <div id="round-summary-card" class="card hidden" style="margin-top:14px; background:#FFF8DC;">
+            <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+              <div>
+                <h2 style="margin:0 0 4px; font-size:1.3rem; font-weight:900;">🎉 本關完結！全部不同處已於上方標示</h2>
+                <div id="round-answers-list" style="font-size:0.9rem; font-weight:700; color:var(--text-muted); line-height:1.5;"></div>
+              </div>
+              <div id="round-summary-host-btns" style="display:flex; gap:10px;">
+                <button class="btn btn-coral btn-lg" id="btn-next-round">➡️ 進入下一關</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="sidebar-panel">
+          <div class="card" style="padding:14px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+              <h3 style="margin:0; font-size:1.05rem; font-weight:900;" id="lb-heading">🏆 即時排行榜</h3>
+              <span class="diff-badge tabular" id="lb-count-badge">0 人</span>
+            </div>
+            <div id="live-leaderboard" style="display:flex; flex-direction:column; gap:7px;"></div>
+          </div>
+
+          <div class="card" style="padding:14px;">
+            <h3 style="margin:0 0 8px; font-size:1rem; font-weight:900;">📣 戰況快報</h3>
+            <div id="event-feed" class="event-feed"></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="view-finished" class="hidden">
+      <div class="card" style="text-align:center;">
+        <div class="comic-ribbon">🏆 終極眼力王誕生！</div>
+        <h1 style="margin:4px 0 8px; font-size:2rem; font-weight:900;">全場總結算</h1>
+        <div class="checkered-bar"></div>
+        <div id="podium-grid" class="podium-grid"></div>
+        <div id="final-full-list" style="max-width:560px; margin:14px auto; display:flex; flex-direction:column; gap:8px; text-align:left;"></div>
+        <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px; margin-top:20px;">
+          <button class="btn btn-coral btn-lg" id="btn-play-again">🔄 返回大堂再開一局</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-qr" class="modal-backdrop hidden">
+    <div class="modal-box" style="max-width:440px; text-align:center;">
+      <div class="modal-header">
+        <h2>📱 掃描 QR Code 即刻入房</h2>
+        <button class="btn" data-close-modal="modal-qr">✕</button>
+      </div>
+      <div id="qr-canvas-box" style="display:flex; justify-content:center; padding:16px; background:#FFFFFF; border:3px solid #111111; border-radius:14px; margin-bottom:12px;"></div>
+      <div id="qr-room-label" style="font-size:1.3rem; font-weight:900; margin-bottom:6px;"></div>
+      <div id="qr-url-text" style="font-size:0.82rem; word-break:break-all; color:var(--text-muted); margin-bottom:12px;"></div>
+      <button class="btn btn-cobalt" id="btn-copy-join-url">📋 複製入房連結</button>
+    </div>
+  </div>
+
+  <div id="modal-rules" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>📖 遊戲規則與雙模式說明</h2>
+        <button class="btn" data-close-modal="modal-rules">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:0.95rem; line-height:1.6;">
+        <div style="padding:12px; background:#FFF8DC; border:2.5px solid #111111; border-radius:12px;">
+          <strong>⚡ 模式一：全場即時搶點（Shared Race）</strong><br/>
+          每個不同處全場只有<strong>最快點中嘅 1 位玩家</strong>可以搶到分！越早搵到有速度加分（最多 +50），連中仲有 Combo 加成（每連中 +15）。搵晒或者時間到即完關。
+        </div>
+        <div style="padding:12px; background:#EFF6FF; border:2.5px solid #111111; border-radius:12px;">
+          <strong>🏁 模式二：各自鬥快搵齊（Independent Sprint）</strong><br/>
+          每位玩家喺自己手機獨立搵齊全關所有不同處！每搵到 1 處得 100 分，最先搵齊全關頭三名分別額外拎 <strong>+150 / +100 / +60 完賽獎金</strong>加剩餘時間加分。
+        </div>
+        <div style="padding:12px; background:#FEF2F2; border:2.5px solid #111111; border-radius:12px;">
+          <strong>⚠️ 防亂撳冷卻機制</strong><br/>
+          撳錯空白位置會斷 Combo 並觸發短暫冷卻（預設 2 秒），唔好盲目狂點呀！左右兩幅圖邊一邊點中都有效。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>⚙️ 遊戲設定與 10 關畫風題庫</h2>
+        <button class="btn" data-close-modal="modal-settings">✕</button>
+      </div>
+      <div class="setting-row">
+        <strong>🎯 搶答玩法模式</strong>
+        <div class="seg-group" id="cfg-game-mode">
+          <button type="button" class="seg-btn active" data-val="shared_race">⚡ 全場即時搶點</button>
+          <button type="button" class="seg-btn" data-val="solo_sprint">🏁 各自鬥快搵齊</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <strong>👥 計分方式</strong>
+        <div class="seg-group" id="cfg-team-mode">
+          <button type="button" class="seg-btn active" data-val="false">🧑 個人積分賽</button>
+          <button type="button" class="seg-btn" data-val="true">🏳️ 紅藍黃綠分組賽</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <strong>🔢 遊玩關卡數目（1–10 關）</strong>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="range" id="cfg-round-count" min="1" max="10" value="6" />
+          <span id="cfg-round-count-val" class="diff-badge tabular">6 關</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <strong>⏱️ 每關限時</strong>
+        <div class="seg-group" id="cfg-duration">
+          <button type="button" class="seg-btn" data-val="45">45秒</button>
+          <button type="button" class="seg-btn" data-val="60">60秒</button>
+          <button type="button" class="seg-btn active" data-val="75">75秒</button>
+          <button type="button" class="seg-btn" data-val="90">90秒</button>
+          <button type="button" class="seg-btn" data-val="120">120秒</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <strong>🧊 撳錯冷卻懲罰</strong>
+        <div class="seg-group" id="cfg-cooldown">
+          <button type="button" class="seg-btn" data-val="0">關閉</button>
+          <button type="button" class="seg-btn" data-val="1000">1秒</button>
+          <button type="button" class="seg-btn active" data-val="2000">2秒</button>
+          <button type="button" class="seg-btn" data-val="3000">3秒</button>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px;">
+          <strong>🎨 選擇出題關卡（點選開關，共 10 款風格）：</strong>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn" id="btn-select-all-scenes" style="min-height:32px; font-size:0.8rem;">全選 10 關</button>
+            <button type="button" class="btn btn-coral" id="btn-select-hard-scenes" style="min-height:32px; font-size:0.8rem;">只揀困難/地獄</button>
+          </div>
+        </div>
+        <div id="settings-scene-grid" class="scene-grid"></div>
+      </div>
+      <div class="setting-row" style="margin-top:12px; border-bottom:none;">
+        <strong>🌐 連線伺服器 (Worker WSS)</strong>
+        <input class="input-field" id="cfg-worker-url" style="max-width:360px; font-size:0.85rem;" />
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-mint btn-lg" id="btn-save-settings">✅ 儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-host" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>🛠️ 主持後台（God Mode）</h2>
+        <button class="btn" data-close-modal="modal-host">✕</button>
+      </div>
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <button class="btn btn-yellow" id="host-btn-pause">⏸️ 暫停／繼續計時</button>
+        <button class="btn btn-purple" id="host-btn-hint">💡 發放 1 個提示閃燈</button>
+        <button class="btn btn-cobalt" id="host-btn-end-round">⏭️ 立即結束本關揭曉答案</button>
+        <button class="btn btn-coral" id="host-btn-finish">🏁 直接跳去終極結算</button>
+      </div>
+      <h3 style="margin:0 0 8px; font-size:1rem; font-weight:900;">手動微調分數／管理玩家</h3>
+      <div id="host-player-manage-list" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_WORKER_WS_URL = "wss://spot-the-diff.ymtwill.workers.dev";
+    const STORAGE_KEY = "spot_the_diff_v1_state";
+
+    const TEAM_INFO = {
+      red: { name: "紅隊", color: "#FF4D4D" },
+      blue: { name: "藍隊", color: "#2563EB" },
+      yellow: { name: "黃隊", color: "#EAB308" },
+      green: { name: "綠隊", color: "#22C55E" },
+    };
+
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    const SCENES = [
+      {
+        id: "diner", title: "港式茶餐廳", style: "美式漫畫風", difficulty: "easy", diffLabel: "入門 ★☆☆",
+        diffs: [
+          { id: "diner_1", x: 190, y: 26, r: 24, label: "吊燈顏色（黃變紅）" },
+          { id: "diner_2", x: 196, y: 92, r: 24, label: "菠蘿油價錢（$16 變 $26）" },
+          { id: "diner_3", x: 308, y: 62, r: 26, label: "掛牆時鐘時間（3:00 變 9:00）" },
+          { id: "diner_4", x: 80, y: 140, r: 26, label: "奶茶熱氣變藍飲管" },
+          { id: "diner_5", x: 188, y: 200, r: 26, label: "菠蘿包唔見咗牛油" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="168" fill="#FFF8DC"/>
+            <rect x="0" y="126" width="360" height="44" fill="#E0F2FE" stroke="#111111" stroke-width="2"/>
+            ${[45,90,135,180,225,270,315].map(x => `<line x1="${x}" y1="126" x2="${x}" y2="170" stroke="#93C5FD" stroke-width="1.5"/>`).join("")}
+            <rect x="16" y="26" width="84" height="80" rx="4" fill="#7DD3FC" stroke="#111111" stroke-width="3"/>
+            <line x1="58" y1="26" x2="58" y2="106" stroke="#111111" stroke-width="2.5"/>
+            <line x1="16" y1="66" x2="100" y2="66" stroke="#111111" stroke-width="2.5"/>
+            <circle cx="42" cy="92" r="12" fill="#FB923C" stroke="#111111" stroke-width="2"/>
+            <polygon points="32,84 35,74 41,82" fill="#FB923C" stroke="#111111" stroke-width="2"/>
+            <polygon points="52,84 49,74 43,82" fill="#FB923C" stroke="#111111" stroke-width="2"/>
+            <circle cx="38" cy="91" r="2" fill="#111111"/><circle cx="46" cy="91" r="2" fill="#111111"/>
+            <line x1="190" y1="0" x2="190" y2="14" stroke="#111111" stroke-width="3"/>
+            <path d="M 164 32 Q 190 8 216 32 Z" fill="${isRight ? "#FF4D4D" : "#FFE500"}" stroke="#111111" stroke-width="2.5"/>
+            <circle cx="190" cy="33" r="5" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <rect x="122" y="44" width="136" height="72" rx="4" fill="#166534" stroke="#111111" stroke-width="3"/>
+            <rect x="122" y="44" width="136" height="18" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            <text x="190" y="57" text-anchor="middle" font-size="11" font-weight="900" fill="#111111">冰室精選餐牌</text>
+            <text x="134" y="79" font-size="12" font-weight="700" fill="#FFFFFF">絲襪奶茶  $22</text>
+            <text x="134" y="95" font-size="12" font-weight="700" fill="#FFE500">鮮油菠蘿  ${isRight ? "$26" : "$16"}</text>
+            <text x="134" y="110" font-size="12" font-weight="700" fill="#FFFFFF">招牌常餐  $48</text>
+            <circle cx="308" cy="62" r="29" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+            <line x1="308" y1="37" x2="308" y2="42" stroke="#111111" stroke-width="2.5"/>
+            <line x1="308" y1="82" x2="308" y2="87" stroke="#111111" stroke-width="2.5"/>
+            <line x1="283" y1="62" x2="288" y2="62" stroke="#111111" stroke-width="2.5"/>
+            <line x1="328" y1="62" x2="333" y2="62" stroke="#111111" stroke-width="2.5"/>
+            <line x1="308" y1="62" x2="308" y2="45" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="308" y1="62" x2="${isRight ? 293 : 323}" y2="62" stroke="#FF4D4D" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="308" cy="62" r="3" fill="#111111"/>
+            <rect x="0" y="166" width="360" height="94" fill="#FF4D4D" stroke="#111111" stroke-width="3"/>
+            <rect x="0" y="180" width="360" height="64" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>
+            ${isRight
+              ? `<line x1="80" y1="162" x2="94" y2="124" stroke="#111111" stroke-width="7" stroke-linecap="round"/><line x1="80" y1="162" x2="94" y2="124" stroke="#2563EB" stroke-width="3.5" stroke-linecap="round"/>`
+              : `<path d="M 68 148 Q 64 139 69 130" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round"/><path d="M 82 148 Q 78 139 83 130" fill="none" stroke="#64748B" stroke-width="2.5" stroke-linecap="round"/>`
+            }
+            <ellipse cx="74" cy="218" rx="30" ry="9" fill="#E2E8F0" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 50 162 L 98 162 L 91 214 L 57 214 Z" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>
+            <rect x="53" y="178" width="42" height="11" fill="#FF4D4D" stroke="#111111" stroke-width="1.5"/>
+            <path d="M 97 172 C 111 172 111 196 94 198" fill="none" stroke="#111111" stroke-width="3"/>
+            <ellipse cx="188" cy="218" rx="48" ry="14" fill="#F8FAFC" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 150 209 C 150 174 226 174 226 209 Z" fill="#F59E0B" stroke="#111111" stroke-width="2.5"/>
+            <line x1="168" y1="182" x2="202" y2="204" stroke="#92400E" stroke-width="2"/>
+            <line x1="202" y1="182" x2="168" y2="204" stroke="#92400E" stroke-width="2"/>
+            <rect x="155" y="203" width="66" height="9" rx="3" fill="#FDE68A" stroke="#111111" stroke-width="2"/>
+            ${isRight ? "" : `<rect x="171" y="198" width="35" height="10" rx="2" fill="#FFE500" stroke="#111111" stroke-width="2"/>`}
+            <rect x="280" y="156" width="24" height="62" rx="5" fill="#EF4444" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="286,156 298,156 292,140" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <rect x="284" y="175" width="16" height="20" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>
+            <rect x="316" y="182" width="20" height="36" rx="4" fill="#E2E8F0" stroke="#111111" stroke-width="2.5"/>
+            <rect x="316" y="175" width="20" height="9" rx="2" fill="#94A3B8" stroke="#111111" stroke-width="2"/>
+          `;
+        }
+      },
+      {
+        id: "camp", title: "郊遊露營營地", style: "戶外插畫風", difficulty: "easy", diffLabel: "入門 ★☆☆",
+        diffs: [
+          { id: "camp_1", x: 278, y: 34, r: 28, label: "右上白雲消失" },
+          { id: "camp_2", x: 52, y: 74, r: 22, label: "松樹頂紅雀飛走" },
+          { id: "camp_3", x: 162, y: 92, r: 26, label: "帳篷旗變紅且向左" },
+          { id: "camp_4", x: 256, y: 186, r: 24, label: "棉花糖少咗 1 粒" },
+          { id: "camp_5", x: 318, y: 202, r: 28, label: "雪櫃箱由藍變綠" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="162" fill="#BAE6FD"/>
+            <circle cx="50" cy="40" r="18" fill="#FFE500" stroke="#111111" stroke-width="2.5"/>
+            <line x1="50" y1="14" x2="50" y2="18" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="50" y1="62" x2="50" y2="66" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="24" y1="40" x2="28" y2="40" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="72" y1="40" x2="76" y2="40" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M 118 46 C 108 46 108 32 120 32 C 124 22 142 22 146 32 C 156 32 156 46 146 46 Z" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? "" : `<path d="M 258 42 C 248 42 248 28 260 28 C 264 18 284 18 288 28 C 298 28 298 42 288 42 Z" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>`}
+            <polygon points="0,162 94,72 194,162" fill="#93C5FD" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="140,162 252,60 360,162" fill="#60A5FA" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="227,84 252,60 277,84 261,80 252,90 241,80" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <rect x="0" y="158" width="360" height="102" fill="#4ADE80" stroke="#111111" stroke-width="3"/>
+            <rect x="44" y="176" width="16" height="26" fill="#92400E" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="16,180 52,126 88,180" fill="#16A34A" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="22,150 52,104 82,150" fill="#15803D" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="30,122 52,84 74,122" fill="#16A34A" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? "" : `<circle cx="52" cy="75" r="8" fill="#FF4D4D" stroke="#111111" stroke-width="2"/><polygon points="59,73 66,75 59,78" fill="#FFE500" stroke="#111111" stroke-width="1.5"/><circle cx="54" cy="73" r="1.5" fill="#111111"/>`}
+            <line x1="162" y1="108" x2="162" y2="82" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? `<polygon points="162,82 134,90 162,98" fill="#FF4D4D" stroke="#111111" stroke-width="2"/>` : `<polygon points="162,82 190,90 162,98" fill="#FFE500" stroke="#111111" stroke-width="2"/>`}
+            <polygon points="98,202 162,106 226,202" fill="#FB923C" stroke="#111111" stroke-width="3"/>
+            <polygon points="136,202 162,148 188,202" fill="#1E293B" stroke="#111111" stroke-width="2.5"/>
+            <line x1="162" y1="106" x2="162" y2="148" stroke="#111111" stroke-width="2.5"/>
+            <rect x="226" y="222" width="50" height="9" rx="3" fill="#92400E" stroke="#111111" stroke-width="2" transform="rotate(14 251 226)"/>
+            <rect x="226" y="222" width="50" height="9" rx="3" fill="#B45309" stroke="#111111" stroke-width="2" transform="rotate(-14 251 226)"/>
+            <path d="M 235 222 C 232 198 248 192 251 178 C 258 192 269 198 266 222 Z" fill="#FF4D4D" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 242 222 C 242 208 251 200 251 194 C 256 202 260 210 260 222 Z" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            <line x1="242" y1="184" x2="294" y2="206" stroke="#111111" stroke-width="2.5" stroke-linecap="round"/>
+            <rect x="242" y="178" width="10" height="11" rx="2" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            ${isRight ? "" : `<rect x="256" y="184" width="10" height="11" rx="2" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>`}
+            <rect x="292" y="182" width="54" height="40" rx="5" fill="${isRight ? "#22C55E" : "#2563EB"}" stroke="#111111" stroke-width="2.5"/>
+            <rect x="290" y="172" width="58" height="12" rx="3" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>
+            <rect x="311" y="191" width="16" height="7" rx="2" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>
+          `;
+        }
+      },
+      {
+        id: "mtr", title: "港鐵車廂日常", style: "扁平幾何風", difficulty: "medium", diffLabel: "中級 ★★☆",
+        diffs: [
+          { id: "mtr_1", x: 202, y: 20, r: 24, label: "路線圖綠燈變 5 粒" },
+          { id: "mtr_2", x: 282, y: 78, r: 22, label: "第 3 個吊環變黃色" },
+          { id: "mtr_3", x: 86, y: 112, r: 22, label: "禁止牌由紅變藍" },
+          { id: "mtr_4", x: 56, y: 162, r: 24, label: "關愛座白心消失" },
+          { id: "mtr_5", x: 304, y: 164, r: 24, label: "背囊黃星變紅圓" },
+          { id: "mtr_6", x: 180, y: 216, r: 26, label: "黃色空隙警戒線斷開" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="200" fill="#F1F5F9"/>
+            <rect x="0" y="0" width="360" height="38" fill="#E2E8F0" stroke="#111111" stroke-width="2"/>
+            <rect x="110" y="9" width="140" height="22" rx="4" fill="#1E293B" stroke="#111111" stroke-width="2"/>
+            <line x1="124" y1="20" x2="236" y2="20" stroke="#FFFFFF" stroke-width="2"/>
+            <circle cx="126" cy="20" r="4.5" fill="#22C55E"/><circle cx="147" cy="20" r="4.5" fill="#22C55E"/><circle cx="168" cy="20" r="4.5" fill="#22C55E"/>
+            <circle cx="189" cy="20" r="4.5" fill="${isRight ? "#22C55E" : "#475569"}"/>
+            <circle cx="210" cy="20" r="4.5" fill="${isRight ? "#22C55E" : "#475569"}"/>
+            <circle cx="231" cy="20" r="4.5" fill="#475569"/>
+            <rect x="114" y="42" width="132" height="158" fill="#CBD5E1" stroke="#111111" stroke-width="3"/>
+            <line x1="180" y1="42" x2="180" y2="200" stroke="#111111" stroke-width="3"/>
+            <rect x="125" y="56" width="44" height="74" rx="8" fill="#7DD3FC" stroke="#111111" stroke-width="2.5"/>
+            <rect x="191" y="56" width="44" height="74" rx="8" fill="#7DD3FC" stroke="#111111" stroke-width="2.5"/>
+            <line x1="0" y1="50" x2="108" y2="50" stroke="#111111" stroke-width="4"/>
+            <line x1="252" y1="50" x2="360" y2="50" stroke="#111111" stroke-width="4"/>
+            ${[32, 78, 282, 328].map((x, idx) => `<line x1="${x}" y1="50" x2="${x}" y2="70" stroke="#111111" stroke-width="2.5"/><polygon points="${x-9},86 ${x},68 ${x+9},86" fill="${isRight && idx === 2 ? "#FFE500" : "#FFFFFF"}" stroke="#111111" stroke-width="2.5"/>`).join("")}
+            <rect x="74" y="100" width="26" height="26" rx="4" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <circle cx="87" cy="113" r="8.5" fill="none" stroke="${isRight ? "#2563EB" : "#FF4D4D"}" stroke-width="2.5"/>
+            <line x1="81" y1="107" x2="93" y2="119" stroke="${isRight ? "#2563EB" : "#FF4D4D"}" stroke-width="2.5"/>
+            <rect x="0" y="200" width="360" height="60" fill="#94A3B8" stroke="#111111" stroke-width="3"/>
+            ${isRight ? `<rect x="114" y="210" width="56" height="12" rx="2" fill="#FFE500" stroke="#111111" stroke-width="2"/><rect x="190" y="210" width="56" height="12" rx="2" fill="#FFE500" stroke="#111111" stroke-width="2"/>` : `<rect x="114" y="210" width="132" height="12" rx="2" fill="#FFE500" stroke="#111111" stroke-width="2"/>`}
+            <rect x="12" y="144" width="90" height="38" rx="4" fill="#FF4D4D" stroke="#111111" stroke-width="2.5"/>
+            <rect x="12" y="180" width="90" height="20" rx="3" fill="#DC2626" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? "" : `<path d="M 57 171 L 49 163 C 46 159 49 154 54 156 L 57 160 L 60 156 C 65 154 68 159 65 163 Z" fill="#FFFFFF"/>`}
+            <rect x="258" y="144" width="90" height="38" rx="4" fill="#CBD5E1" stroke="#111111" stroke-width="2.5"/>
+            <rect x="258" y="180" width="90" height="20" rx="3" fill="#64748B" stroke="#111111" stroke-width="2.5"/>
+            <rect x="280" y="128" width="48" height="56" rx="10" fill="#A855F7" stroke="#111111" stroke-width="2.5"/>
+            <rect x="288" y="152" width="32" height="24" rx="4" fill="#9333EA" stroke="#111111" stroke-width="2"/>
+            ${isRight ? `<circle cx="304" cy="164" r="6.5" fill="#FF4D4D" stroke="#111111" stroke-width="1.5"/>` : `<polygon points="304,156 306,161 312,161 307,165 309,170 304,167 299,170 301,165 296,161 302,161" fill="#FFE500" stroke="#111111" stroke-width="1.2"/>`}
+          `;
+        }
+      },
+      {
+        id: "arcade", title: "8-Bit 像素街機廳", style: "像素復古風", difficulty: "medium", diffLabel: "中級 ★★☆",
+        diffs: [
+          { id: "arc_1", x: 180, y: 24, r: 24, label: "計分牌由 9900 變 8900" },
+          { id: "arc_2", x: 64, y: 120, r: 24, label: "左街機外星人缺左腳" },
+          { id: "arc_3", x: 180, y: 122, r: 24, label: "中街機鬼魂變青色" },
+          { id: "arc_4", x: 294, y: 122, r: 24, label: "右街機心心少咗 1 粒" },
+          { id: "arc_5", x: 46, y: 172, r: 22, label: "左街機搖桿波變綠色" },
+          { id: "arc_6", x: 296, y: 222, r: 24, label: "右街機投幣口閃紅燈" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="260" fill="#0F172A"/>
+            ${[32,64,96,128,160,192,224].map(y => `<line x1="0" y1="${y}" x2="360" y2="${y}" stroke="#1E293B" stroke-width="1"/>`).join("")}
+            ${[40,80,120,160,200,240,280,320].map(x => `<line x1="${x}" y1="0" x2="${x}" y2="260" stroke="#1E293B" stroke-width="1"/>`).join("")}
+            <rect x="92" y="10" width="176" height="28" fill="#020617" stroke="#38BDF8" stroke-width="3"/>
+            <text x="180" y="29" text-anchor="middle" font-family="monospace" font-size="14" font-weight="900" fill="#FFE500">HI-SCORE ${isRight ? "8900" : "9900"}</text>
+            <rect x="18" y="54" width="92" height="196" fill="#EC4899" stroke="#111111" stroke-width="3"/>
+            <rect x="26" y="62" width="76" height="18" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            <text x="64" y="75" text-anchor="middle" font-family="monospace" font-size="10" font-weight="900" fill="#111111">INVADER</text>
+            <rect x="26" y="88" width="76" height="64" fill="#020617" stroke="#111111" stroke-width="2.5"/>
+            <rect x="52" y="104" width="24" height="16" fill="#22C55E"/><rect x="46" y="112" width="36" height="8" fill="#22C55E"/>
+            <rect x="56" y="108" width="4" height="4" fill="#020617"/><rect x="68" y="108" width="4" height="4" fill="#020617"/>
+            ${isRight ? "" : `<rect x="48" y="122" width="6" height="8" fill="#22C55E"/>`}<rect x="74" y="122" width="6" height="8" fill="#22C55E"/>
+            <rect x="22" y="162" width="84" height="28" fill="#1E293B" stroke="#111111" stroke-width="2"/>
+            <rect x="44" y="172" width="4" height="12" fill="#CBD5E1"/>
+            <circle cx="46" cy="170" r="7" fill="${isRight ? "#22C55E" : "#FF4D4D"}" stroke="#111111" stroke-width="2"/>
+            <circle cx="72" cy="176" r="5" fill="#FFE500"/><circle cx="88" cy="176" r="5" fill="#38BDF8"/>
+            <rect x="48" y="210" width="32" height="24" fill="#0F172A" stroke="#111111" stroke-width="2"/>
+            <rect x="134" y="54" width="92" height="196" fill="#2563EB" stroke="#111111" stroke-width="3"/>
+            <rect x="142" y="62" width="76" height="18" fill="#38BDF8" stroke="#111111" stroke-width="2"/>
+            <text x="180" y="75" text-anchor="middle" font-family="monospace" font-size="10" font-weight="900" fill="#111111">PAC-RUN</text>
+            <rect x="142" y="88" width="76" height="64" fill="#020617" stroke="#111111" stroke-width="2.5"/>
+            <circle cx="162" cy="120" r="10" fill="#FFE500"/><polygon points="162,120 174,113 174,127" fill="#020617"/>
+            <rect x="186" y="110" width="18" height="20" rx="6" fill="${isRight ? "#22D3EE" : "#FF4D4D"}"/>
+            <rect x="190" y="115" width="4" height="4" fill="#FFFFFF"/><rect x="198" y="115" width="4" height="4" fill="#FFFFFF"/>
+            <rect x="138" y="162" width="84" height="28" fill="#1E293B" stroke="#111111" stroke-width="2"/>
+            <circle cx="162" cy="170" r="7" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            <circle cx="188" cy="176" r="5" fill="#FF4D4D"/><circle cx="204" cy="176" r="5" fill="#22C55E"/>
+            <rect x="164" y="210" width="32" height="24" fill="#0F172A" stroke="#111111" stroke-width="2"/>
+            <rect x="250" y="54" width="92" height="196" fill="#9333EA" stroke="#111111" stroke-width="3"/>
+            <rect x="258" y="62" width="76" height="18" fill="#4ADE80" stroke="#111111" stroke-width="2"/>
+            <text x="296" y="75" text-anchor="middle" font-family="monospace" font-size="10" font-weight="900" fill="#111111">HERO-8B</text>
+            <rect x="258" y="88" width="76" height="64" fill="#020617" stroke="#111111" stroke-width="2.5"/>
+            <rect x="270" y="114" width="12" height="12" fill="#FF4D4D"/><rect x="290" y="114" width="12" height="12" fill="#FF4D4D"/>
+            ${isRight ? "" : `<rect x="310" y="114" width="12" height="12" fill="#FF4D4D"/>`}
+            <rect x="254" y="162" width="84" height="28" fill="#1E293B" stroke="#111111" stroke-width="2"/>
+            <circle cx="278" cy="170" r="7" fill="#38BDF8" stroke="#111111" stroke-width="2"/>
+            <circle cx="304" cy="176" r="5" fill="#FFE500"/><circle cx="320" cy="176" r="5" fill="#EC4899"/>
+            <rect x="280" y="210" width="32" height="24" fill="#0F172A" stroke="#111111" stroke-width="2"/>
+            <rect x="290" y="218" width="12" height="8" fill="${isRight ? "#FF4D4D" : "#FFE500"}"/>
+          `;
+        }
+      },
+      {
+        id: "ukiyoe", title: "浮世繪海浪與神社", style: "日系版畫風", difficulty: "medium", diffLabel: "中級 ★★☆",
+        diffs: [
+          { id: "uki_1", x: 282, y: 50, r: 26, label: "紅日變咗橙色新月" },
+          { id: "uki_2", x: 180, y: 74, r: 24, label: "富士山積雪線變平" },
+          { id: "uki_3", x: 84, y: 116, r: 22, label: "鳥居中間牌匾消失" },
+          { id: "uki_4", x: 46, y: 146, r: 22, label: "左邊紙燈籠變金色" },
+          { id: "uki_5", x: 292, y: 152, r: 24, label: "海浪頂飛鳥多咗 1 隻" },
+          { id: "uki_6", x: 196, y: 226, r: 24, label: "水底錦鯉掉轉方向" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="260" fill="#F5ECD7"/>
+            <rect x="6" y="6" width="348" height="248" fill="none" stroke="#1E3A5F" stroke-width="2" stroke-dasharray="6 4"/>
+            ${isRight ? `<path d="M 288 30 A 22 22 0 1 0 288 70 A 16 16 0 1 1 288 30 Z" fill="#EA580C" stroke="#1E293B" stroke-width="2"/>` : `<circle cx="282" cy="50" r="22" fill="#DC2626" stroke="#1E293B" stroke-width="2"/>`}
+            <circle cx="48" cy="38" r="4" fill="#F472B6"/><circle cx="118" cy="30" r="3.5" fill="#F472B6"/><circle cx="222" cy="36" r="4" fill="#F472B6"/><circle cx="328" cy="96" r="3.5" fill="#F472B6"/>
+            <polygon points="78,184 180,52 282,184" fill="#1E3A5F" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? `<polygon points="154,86 180,52 206,86" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>` : `<polygon points="150,91 180,52 210,91 196,82 180,94 164,82" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>`}
+            <rect x="58" y="102" width="10" height="84" fill="#DC2626" stroke="#111111" stroke-width="2"/>
+            <rect x="100" y="102" width="10" height="84" fill="#DC2626" stroke="#111111" stroke-width="2"/>
+            <path d="M 42 98 Q 84 106 126 98 L 122 108 Q 84 114 46 108 Z" fill="#B91C1C" stroke="#111111" stroke-width="2"/>
+            <rect x="50" y="120" width="68" height="8" fill="#DC2626" stroke="#111111" stroke-width="2"/>
+            ${isRight ? "" : `<rect x="77" y="108" width="14" height="18" fill="#111111" stroke="#F59E0B" stroke-width="1.5"/>`}
+            <line x1="46" y1="128" x2="46" y2="136" stroke="#111111" stroke-width="2"/>
+            <ellipse cx="46" cy="146" rx="9" ry="12" fill="${isRight ? "#F59E0B" : "#FFFBEB"}" stroke="#111111" stroke-width="2"/>
+            <path d="M 0 184 Q 70 156 140 184 T 280 184 T 360 176 L 360 260 L 0 260 Z" fill="#1D4ED8" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 0 206 Q 90 182 180 208 T 360 204 L 360 260 L 0 260 Z" fill="#1E3A8A" stroke="#111111" stroke-width="2"/>
+            <path d="M 244 176 Q 272 142 308 164 Q 294 172 288 182 Z" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <path d="M 250 144 Q 256 138 262 144 Q 268 138 274 144" fill="none" stroke="#111111" stroke-width="2"/>
+            ${isRight ? `<path d="M 280 154 Q 286 148 292 154 Q 298 148 304 154" fill="none" stroke="#111111" stroke-width="2"/>` : ""}
+            <g transform="${isRight ? "translate(392,0) scale(-1,1)" : ""}">
+              <ellipse cx="196" cy="226" rx="22" ry="9" fill="#FB923C" stroke="#111111" stroke-width="2"/>
+              <polygon points="174,226 162,218 162,234" fill="#EA580C" stroke="#111111" stroke-width="2"/>
+              <circle cx="209" cy="224" r="2" fill="#111111"/>
+            </g>
+          `;
+        }
+      },
+      {
+        id: "cyberpunk", title: "霓虹賽博夜市", style: "賽博龐克霓虹風", difficulty: "hard", diffLabel: "困難 ★★★",
+        diffs: [
+          { id: "cyb_1", x: 54, y: 46, r: 22, label: "左上霓虹字「麵」變「茶」" },
+          { id: "cyb_2", x: 184, y: 36, r: 22, label: "無人機鏡頭由紅變綠" },
+          { id: "cyb_3", x: 318, y: 54, r: 22, label: "右大廈頂少咗 1 條天線" },
+          { id: "cyb_4", x: 123, y: 122, r: 22, label: "宵夜招牌燈框由粉紅變青" },
+          { id: "cyb_5", x: 244, y: 128, r: 22, label: "全息廣告箭嘴向下" },
+          { id: "cyb_6", x: 75, y: 202, r: 22, label: "檔口多咗 1 隻拉麵碗" },
+          { id: "cyb_7", x: 288, y: 234, r: 24, label: "地面水窪霓虹倒影變黃" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="260" fill="#090D16"/>
+            <rect x="10" y="24" width="76" height="186" fill="#1E1B4B" stroke="#38BDF8" stroke-width="1.5"/>
+            <rect x="96" y="48" width="84" height="162" fill="#172554" stroke="#A855F7" stroke-width="1.5"/>
+            <rect x="190" y="34" width="78" height="176" fill="#1E1B4B" stroke="#EC4899" stroke-width="1.5"/>
+            <rect x="278" y="64" width="72" height="146" fill="#0F172A" stroke="#22D3EE" stroke-width="1.5"/>
+            ${[36,54,72,90,108].map(y => `<rect x="288" y="${y+46}" width="10" height="8" fill="#38BDF8" fill-opacity="0.5"/><rect x="308" y="${y+46}" width="10" height="8" fill="#F472B6" fill-opacity="0.5"/><rect x="328" y="${y+46}" width="10" height="8" fill="#FFE500" fill-opacity="0.4"/>`).join("")}
+            <line x1="298" y1="64" x2="298" y2="38" stroke="#22D3EE" stroke-width="2"/>
+            ${isRight ? "" : `<line x1="318" y1="64" x2="318" y2="44" stroke="#EC4899" stroke-width="2"/>`}
+            <rect x="22" y="32" width="64" height="28" rx="4" fill="#090D16" stroke="#EC4899" stroke-width="2.5"/>
+            <text x="54" y="51" text-anchor="middle" font-size="14" font-weight="900" fill="#F472B6">九龍${isRight ? "茶" : "麵"}</text>
+            <rect x="164" y="30" width="40" height="12" rx="4" fill="#334155" stroke="#38BDF8" stroke-width="2"/>
+            <line x1="156" y1="26" x2="174" y2="26" stroke="#CBD5E1" stroke-width="2"/><line x1="194" y1="26" x2="212" y2="26" stroke="#CBD5E1" stroke-width="2"/>
+            <circle cx="184" cy="36" r="4" fill="${isRight ? "#22C55E" : "#FF4D4D"}"/>
+            <rect x="92" y="106" width="62" height="32" rx="4" fill="#090D16" stroke="${isRight ? "#22D3EE" : "#EC4899"}" stroke-width="2.5"/>
+            <text x="123" y="127" text-anchor="middle" font-size="12" font-weight="900" fill="#FFE500">24H 宵夜</text>
+            <rect x="214" y="104" width="60" height="46" rx="4" fill="#090D16" stroke="#22D3EE" stroke-width="2"/>
+            ${isRight ? `<polygon points="244,142 230,116 258,116" fill="#A855F7"/>` : `<polygon points="244,112 230,138 258,138" fill="#A855F7"/>`}
+            <rect x="0" y="208" width="360" height="52" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+            <rect x="18" y="164" width="128" height="46" fill="#312E81" stroke="#EC4899" stroke-width="2.5"/>
+            <rect x="14" y="156" width="136" height="12" fill="#EC4899"/>
+            <path d="M 32 198 L 54 198 L 50 208 L 36 208 Z" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>
+            ${isRight ? `<path d="M 64 198 L 86 198 L 82 208 L 68 208 Z" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>` : ""}
+            <path d="M 102 198 L 124 198 L 120 208 L 106 208 Z" fill="#22D3EE" stroke="#111111" stroke-width="1.5"/>
+            <ellipse cx="288" cy="234" rx="44" ry="10" fill="${isRight ? "#FFE500" : "#EC4899"}" fill-opacity="0.7" stroke="#FFFFFF" stroke-width="1.5"/>
+          `;
+        }
+      },
+      {
+        id: "observatory", title: "復古天文圖書館", style: "古典羊皮紙風", difficulty: "hard", diffLabel: "困難 ★★★",
+        diffs: [
+          { id: "obs_1", x: 72, y: 56, r: 22, label: "星圖北斗少咗 1 粒星" },
+          { id: "obs_2", x: 249, y: 90, r: 22, label: "書架第 2 層綠書傾斜" },
+          { id: "obs_3", x: 320, y: 134, r: 22, label: "書架第 3 層少咗紅書" },
+          { id: "obs_4", x: 132, y: 146, r: 24, label: "黃銅望遠鏡鏡筒變短" },
+          { id: "obs_5", x: 52, y: 205, r: 22, label: "沙漏沙已經流晒落底" },
+          { id: "obs_6", x: 187, y: 218, r: 24, label: "古籍書籤由紅變藍" },
+          { id: "obs_7", x: 304, y: 216, r: 22, label: "地球儀底座變深棕色" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="260" fill="#F3E5AB"/>
+            <rect x="20" y="18" width="112" height="76" fill="#1E293B" stroke="#78350F" stroke-width="4"/>
+            <polyline points="36,56 54,48 72,56 88,68 106,62 114,44" fill="none" stroke="#FDE68A" stroke-width="1.2" stroke-dasharray="3 2"/>
+            <circle cx="36" cy="56" r="3" fill="#FFE500"/><circle cx="54" cy="48" r="3" fill="#FFE500"/>
+            ${isRight ? "" : `<circle cx="72" cy="56" r="3.5" fill="#FFE500"/>`}
+            <circle cx="88" cy="68" r="3" fill="#FFE500"/><circle cx="106" cy="62" r="3" fill="#FFE500"/><circle cx="114" cy="44" r="3" fill="#FFE500"/>
+            <rect x="210" y="16" width="134" height="142" fill="#78350F" stroke="#111111" stroke-width="3"/>
+            <rect x="218" y="24" width="118" height="38" fill="#451A03"/><rect x="218" y="68" width="118" height="38" fill="#451A03"/><rect x="218" y="112" width="118" height="38" fill="#451A03"/>
+            <rect x="224" y="30" width="14" height="32" fill="#B91C1C" stroke="#111111" stroke-width="1.5"/><rect x="240" y="34" width="12" height="28" fill="#1D4ED8" stroke="#111111" stroke-width="1.5"/>
+            <rect x="254" y="28" width="16" height="34" fill="#15803D" stroke="#111111" stroke-width="1.5"/><rect x="274" y="32" width="14" height="30" fill="#D97706" stroke="#111111" stroke-width="1.5"/><rect x="292" y="30" width="12" height="32" fill="#7C3AED" stroke="#111111" stroke-width="1.5"/>
+            <rect x="224" y="74" width="14" height="32" fill="#0F766E" stroke="#111111" stroke-width="1.5"/>
+            <rect x="242" y="74" width="14" height="32" fill="#16A34A" stroke="#111111" stroke-width="1.5" transform="${isRight ? "rotate(16 249 106)" : ""}"/>
+            <rect x="272" y="76" width="16" height="30" fill="#B91C1C" stroke="#111111" stroke-width="1.5"/><rect x="290" y="74" width="14" height="32" fill="#CA8A04" stroke="#111111" stroke-width="1.5"/>
+            <rect x="224" y="118" width="16" height="32" fill="#1E40AF" stroke="#111111" stroke-width="1.5"/><rect x="242" y="120" width="14" height="30" fill="#B45309" stroke="#111111" stroke-width="1.5"/><rect x="258" y="118" width="14" height="32" fill="#15803D" stroke="#111111" stroke-width="1.5"/>
+            ${isRight ? "" : `<rect x="312" y="118" width="16" height="32" fill="#DC2626" stroke="#111111" stroke-width="1.5"/>`}
+            <line x1="126" y1="154" x2="108" y2="188" stroke="#451A03" stroke-width="3.5"/><line x1="126" y1="154" x2="144" y2="188" stroke="#451A03" stroke-width="3.5"/>
+            <g transform="rotate(-24 126 150)">
+              <rect x="92" y="142" width="${isRight ? 48 : 72}" height="14" rx="3" fill="#D97706" stroke="#111111" stroke-width="2"/>
+              <rect x="86" y="144" width="10" height="10" fill="#92400E" stroke="#111111" stroke-width="1.5"/>
+            </g>
+            <rect x="0" y="186" width="360" height="74" fill="#92400E" stroke="#111111" stroke-width="3"/><rect x="0" y="186" width="360" height="12" fill="#B45309" stroke="#111111" stroke-width="2"/>
+            <rect x="38" y="182" width="28" height="5" fill="#78350F" stroke="#111111" stroke-width="1.5"/><rect x="38" y="224" width="28" height="5" fill="#78350F" stroke="#111111" stroke-width="1.5"/>
+            <polygon points="42,187 62,187 52,205" fill="${isRight ? "#E2E8F0" : "#F59E0B"}" stroke="#111111" stroke-width="1.5"/>
+            <polygon points="42,224 62,224 52,205" fill="${isRight ? "#F59E0B" : "#E2E8F0"}" stroke="#111111" stroke-width="1.5"/>
+            <path d="M 134 202 L 186 208 L 238 202 L 238 238 L 186 244 L 134 238 Z" fill="#FFFBEB" stroke="#111111" stroke-width="2.5"/>
+            <line x1="186" y1="208" x2="186" y2="244" stroke="#111111" stroke-width="2"/><line x1="144" y1="214" x2="176" y2="217" stroke="#94A3B8" stroke-width="2"/><line x1="144" y1="224" x2="176" y2="227" stroke="#94A3B8" stroke-width="2"/>
+            <polygon points="183,208 191,208 191,232 187,226 183,232" fill="${isRight ? "#2563EB" : "#DC2626"}" stroke="#111111" stroke-width="1.2"/>
+            <circle cx="304" cy="184" r="20" fill="#38BDF8" stroke="#111111" stroke-width="2"/><path d="M 294 176 Q 304 172 312 182 Q 302 192 292 188 Z" fill="#22C55E"/>
+            <path d="M 284 208 L 324 208 L 314 226 L 294 226 Z" fill="${isRight ? "#451A03" : "#D97706"}" stroke="#111111" stroke-width="2"/>
+          `;
+        }
+      },
+      {
+        id: "beach", title: "夏日沙灘派對", style: "波普度假風", difficulty: "hard", diffLabel: "困難 ★★★",
+        diffs: [
+          { id: "bch_1", x: 154, y: 44, r: 22, label: "海鷗少咗 1 隻" },
+          { id: "bch_2", x: 282, y: 80, r: 22, label: "帆船紅旗變藍旗" },
+          { id: "bch_3", x: 86, y: 128, r: 24, label: "沙灘傘中間條紋變綠" },
+          { id: "bch_4", x: 204, y: 162, r: 24, label: "沙堡中間尖塔消失" },
+          { id: "bch_5", x: 316, y: 184, r: 22, label: "滑浪板多咗條紅紋" },
+          { id: "bch_6", x: 112, y: 226, r: 22, label: "沙灘波圓心變紫色" },
+          { id: "bch_7", x: 256, y: 230, r: 22, label: "海星變咗紅蟹" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="114" fill="#38BDF8"/>
+            <circle cx="44" cy="34" r="18" fill="#FFE500" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 104 34 Q 112 26 120 34 Q 128 26 136 34" fill="none" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? "" : `<path d="M 142 46 Q 148 40 154 46 Q 160 40 166 46" fill="none" stroke="#111111" stroke-width="2.5"/>`}
+            <rect x="0" y="106" width="360" height="46" fill="#0284C7" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="262,118 314,118 306,130 270,130" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <line x1="288" y1="74" x2="288" y2="118" stroke="#111111" stroke-width="2.5"/>
+            <polygon points="288,80 314,112 288,112" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            <polygon points="288,74 270,80 288,86" fill="${isRight ? "#2563EB" : "#FF4D4D"}" stroke="#111111" stroke-width="1.5"/>
+            <path d="M 0 148 Q 180 134 360 150 L 360 260 L 0 260 Z" fill="#FDE68A" stroke="#111111" stroke-width="3"/>
+            <line x1="86" y1="128" x2="86" y2="212" stroke="#111111" stroke-width="4"/>
+            <path d="M 30 146 Q 86 92 142 146 Z" fill="#FF4D4D" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 62 146 Q 86 96 110 146 Z" fill="${isRight ? "#22C55E" : "#FFFFFF"}" stroke="#111111" stroke-width="2"/>
+            <rect x="174" y="182" width="60" height="32" fill="#F59E0B" stroke="#111111" stroke-width="2.5"/>
+            <rect x="172" y="166" width="16" height="20" fill="#F59E0B" stroke="#111111" stroke-width="2"/><rect x="220" y="166" width="16" height="20" fill="#F59E0B" stroke="#111111" stroke-width="2"/>
+            ${isRight ? "" : `<rect x="196" y="156" width="16" height="28" fill="#F59E0B" stroke="#111111" stroke-width="2"/><polygon points="196,156 204,144 212,156" fill="#FF4D4D" stroke="#111111" stroke-width="1.5"/>`}
+            <path d="M 196 214 L 196 198 A 8 8 0 0 1 212 198 L 212 214 Z" fill="#78350F" stroke="#111111" stroke-width="2"/>
+            <g transform="rotate(14 316 176)">
+              <ellipse cx="316" cy="176" rx="16" ry="44" fill="#22D3EE" stroke="#111111" stroke-width="2.5"/>
+              <line x1="301" y1="166" x2="331" y2="166" stroke="#FFE500" stroke-width="5"/>
+              ${isRight ? `<line x1="301" y1="184" x2="331" y2="184" stroke="#FF4D4D" stroke-width="5"/>` : ""}
+            </g>
+            <circle cx="112" cy="226" r="18" fill="#FFFFFF" stroke="#111111" stroke-width="2.5"/>
+            <path d="M 112 208 A 18 18 0 0 1 130 226 L 112 226 Z" fill="#FF4D4D"/><path d="M 112 244 A 18 18 0 0 1 94 226 L 112 226 Z" fill="#2563EB"/>
+            <circle cx="112" cy="226" r="6" fill="${isRight ? "#A855F7" : "#FFE500"}" stroke="#111111" stroke-width="2"/>
+            ${isRight ? `<ellipse cx="256" cy="232" rx="14" ry="9" fill="#FF4D4D" stroke="#111111" stroke-width="2"/><circle cx="251" cy="224" r="3" fill="#FFFFFF" stroke="#111111" stroke-width="1.5"/><circle cx="261" cy="224" r="3" fill="#FFFFFF" stroke="#111111" stroke-width="1.5"/>` : `<polygon points="256,216 260,226 270,226 262,233 265,243 256,237 247,243 250,233 242,226 252,226" fill="#FB923C" stroke="#111111" stroke-width="2"/>`}
+          `;
+        }
+      },
+      {
+        id: "fellowship", title: "聚會室大掃除", style: "溫暖桌遊插畫風", difficulty: "hard", diffLabel: "困難 ★★★",
+        diffs: [
+          { id: "fel_1", x: 146, y: 54, r: 24, label: "白板「破冰夜」變「祈禱會」" },
+          { id: "fel_2", x: 289, y: 38, r: 22, label: "彩旗第 3 塊變綠色" },
+          { id: "fel_3", x: 46, y: 152, r: 22, label: "木結他少咗 1 條弦" },
+          { id: "fel_4", x: 112, y: 174, r: 22, label: "木箱鼓音孔變方形" },
+          { id: "fel_5", x: 224, y: 164, r: 20, label: "枱上紙杯由 3 隻變 2 隻" },
+          { id: "fel_6", x: 266, y: 168, r: 20, label: "枱上歌書變咗藍色" },
+          { id: "fel_7", x: 326, y: 184, r: 22, label: "盆栽多咗 1 朵黃花" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="180" fill="#F6EFE2"/>
+            <rect x="0" y="180" width="360" height="80" fill="#D9CCB4" stroke="#111111" stroke-width="3"/>
+            <line x1="220" y1="22" x2="352" y2="32" stroke="#111111" stroke-width="2"/>
+            <polygon points="232,23 250,24 241,44" fill="#FF4D4D" stroke="#111111" stroke-width="1.5"/>
+            <polygon points="256,25 274,26 265,46" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>
+            <polygon points="280,27 298,28 289,48" fill="${isRight ? "#22C55E" : "#38BDF8"}" stroke="#111111" stroke-width="1.5"/>
+            <polygon points="304,29 322,30 313,50" fill="#A855F7" stroke="#111111" stroke-width="1.5"/>
+            <rect x="74" y="24" width="144" height="82" rx="6" fill="#FFFFFF" stroke="#111111" stroke-width="3"/>
+            <text x="146" y="56" text-anchor="middle" font-size="16" font-weight="900" fill="#2563EB">${isRight ? "今晚：祈禱會" : "今晚：破冰夜"}</text>
+            <line x1="92" y1="72" x2="200" y2="72" stroke="#94A3B8" stroke-width="2"/><line x1="92" y1="86" x2="174" y2="86" stroke="#94A3B8" stroke-width="2"/>
+            <rect x="176" y="96" width="24" height="6" fill="#FF4D4D" stroke="#111111" stroke-width="1.5"/>
+            <rect x="42" y="88" width="8" height="44" fill="#78350F" stroke="#111111" stroke-width="2"/>
+            <ellipse cx="46" cy="148" rx="18" ry="16" fill="#D97706" stroke="#111111" stroke-width="2.5"/><ellipse cx="46" cy="172" rx="24" ry="20" fill="#D97706" stroke="#111111" stroke-width="2.5"/>
+            <circle cx="46" cy="156" r="8" fill="#451A03" stroke="#111111" stroke-width="2"/>
+            <line x1="43" y1="130" x2="43" y2="174" stroke="#FFFBEB" stroke-width="1.2"/><line x1="46" y1="130" x2="46" y2="174" stroke="#FFFBEB" stroke-width="1.2"/>
+            ${isRight ? "" : `<line x1="49" y1="130" x2="49" y2="174" stroke="#FFFBEB" stroke-width="1.2"/>`}
+            <rect x="90" y="144" width="44" height="58" rx="4" fill="#B45309" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? `<rect x="102" y="164" width="20" height="20" fill="#1E293B" stroke="#111111" stroke-width="2"/>` : `<circle cx="112" cy="174" r="10" fill="#1E293B" stroke="#111111" stroke-width="2"/>`}
+            <rect x="164" y="176" width="132" height="12" rx="3" fill="#92400E" stroke="#111111" stroke-width="2.5"/>
+            <rect x="174" y="188" width="8" height="36" fill="#78350F" stroke="#111111" stroke-width="2"/><rect x="278" y="188" width="8" height="36" fill="#78350F" stroke="#111111" stroke-width="2"/>
+            <polygon points="178,154 192,154 190,176 180,176" fill="#FFFFFF" stroke="#111111" stroke-width="2"/>
+            <polygon points="198,154 212,154 210,176 200,176" fill="#FFE500" stroke="#111111" stroke-width="2"/>
+            ${isRight ? "" : `<polygon points="218,154 232,154 230,176 220,176" fill="#38BDF8" stroke="#111111" stroke-width="2"/>`}
+            <rect x="246" y="162" width="38" height="14" rx="2" fill="${isRight ? "#2563EB" : "#22C55E"}" stroke="#111111" stroke-width="2"/>
+            <polygon points="310,204 342,204 336,232 316,232" fill="#EA580C" stroke="#111111" stroke-width="2.5"/>
+            <ellipse cx="326" cy="186" rx="18" ry="20" fill="#16A34A" stroke="#111111" stroke-width="2.5"/>
+            ${isRight ? `<circle cx="326" cy="182" r="6" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>` : ""}
+          `;
+        }
+      },
+      {
+        id: "spaceship", title: "太空站主控艙（終極關）", style: "科幻藍圖儀表風", difficulty: "nightmare", diffLabel: "地獄 ★★★★",
+        diffs: [
+          { id: "spc_1", x: 94, y: 52, r: 22, label: "窗外土星環斷開" },
+          { id: "spc_2", x: 256, y: 54, r: 20, label: "窗外遠處多咗粒紅星" },
+          { id: "spc_3", x: 56, y: 154, r: 22, label: "雷達綠點移咗位" },
+          { id: "spc_4", x: 146, y: 158, r: 22, label: "波形圖變平線" },
+          { id: "spc_5", x: 233, y: 146, r: 20, label: "電量條少咗 1 格" },
+          { id: "spc_6", x: 306, y: 158, r: 20, label: "警報指示燈變紅色" },
+          { id: "spc_7", x: 120, y: 218, r: 22, label: "第 3 粒推動桿推上咗" },
+          { id: "spc_8", x: 266, y: 220, r: 22, label: "主控台號碼 07 變 09" },
+        ],
+        render(isRight) {
+          return `
+            <rect x="0" y="0" width="360" height="260" fill="#0F172A"/>
+            <path d="M 24 16 L 336 16 L 348 106 L 12 106 Z" fill="#020617" stroke="#38BDF8" stroke-width="3"/>
+            <circle cx="48" cy="34" r="1.8" fill="#FFFFFF"/><circle cx="158" cy="30" r="2" fill="#FFFFFF"/><circle cx="204" cy="76" r="1.8" fill="#FFFFFF"/><circle cx="310" cy="40" r="2" fill="#FFFFFF"/>
+            <circle cx="94" cy="52" r="15" fill="#F59E0B" stroke="#111111" stroke-width="1.5"/>
+            <ellipse cx="94" cy="52" rx="28" ry="6" fill="none" stroke="#FDE68A" stroke-width="2.5" stroke-dasharray="${isRight ? "14 10" : "none"}" transform="rotate(-14 94 52)"/>
+            <circle cx="230" cy="44" r="6" fill="#38BDF8"/>${isRight ? `<circle cx="256" cy="54" r="5" fill="#FF4D4D"/>` : ""}
+            <rect x="12" y="116" width="336" height="134" rx="10" fill="#1E293B" stroke="#64748B" stroke-width="3"/>
+            <circle cx="56" cy="158" r="28" fill="#020617" stroke="#22C55E" stroke-width="2"/><circle cx="56" cy="158" r="14" fill="none" stroke="#166534" stroke-width="1"/>
+            <line x1="56" y1="130" x2="56" y2="186" stroke="#166534" stroke-width="1"/><line x1="28" y1="158" x2="84" y2="158" stroke="#166534" stroke-width="1"/>
+            <circle cx="${isRight ? 68 : 44}" cy="148" r="3.5" fill="#4ADE80"/><circle cx="64" cy="170" r="3" fill="#4ADE80"/>
+            <rect x="102" y="132" width="88" height="52" rx="4" fill="#020617" stroke="#38BDF8" stroke-width="2"/>
+            ${isRight ? `<line x1="110" y1="158" x2="182" y2="158" stroke="#22D3EE" stroke-width="2.5"/>` : `<polyline points="110,158 122,142 134,174 146,144 158,172 170,150 182,158" fill="none" stroke="#22D3EE" stroke-width="2.5"/>`}
+            <rect x="204" y="132" width="58" height="52" rx="4" fill="#020617" stroke="#94A3B8" stroke-width="2"/>
+            <rect x="212" y="170" width="42" height="8" fill="#22C55E"/><rect x="212" y="159" width="42" height="8" fill="#22C55E"/><rect x="212" y="148" width="42" height="8" fill="#FFE500"/>
+            ${isRight ? "" : `<rect x="212" y="137" width="42" height="8" fill="#FF4D4D"/>`}
+            <rect x="276" y="132" width="60" height="52" rx="4" fill="#020617" stroke="#94A3B8" stroke-width="2"/>
+            <circle cx="306" cy="158" r="14" fill="${isRight ? "#FF4D4D" : "#22C55E"}" stroke="#FFFFFF" stroke-width="2"/>
+            <rect x="26" y="198" width="154" height="40" rx="6" fill="#0F172A" stroke="#475569" stroke-width="2"/>
+            ${[52, 86, 120, 154].map((x, idx) => { const knobY = idx === 2 ? (isRight ? 206 : 226) : (idx % 2 === 0 ? 208 : 224); return `<line x1="${x}" y1="204" x2="${x}" y2="232" stroke="#64748B" stroke-width="4" stroke-linecap="round"/><rect x="${x-9}" y="${knobY}" width="18" height="8" rx="2" fill="#FFE500" stroke="#111111" stroke-width="1.5"/>`; }).join("")}
+            <rect x="196" y="198" width="140" height="40" rx="6" fill="#0F172A" stroke="#38BDF8" stroke-width="2"/>
+            <text x="266" y="224" text-anchor="middle" font-family="monospace" font-size="16" font-weight="900" fill="#38BDF8">SEC-${isRight ? "09" : "07"}</text>
+          `;
+        }
+      },
+    ];
+
+    const SFX = {
+      ctx: null, muted: false,
+      _ensure() {
+        if (this.muted) return null;
+        if (!this.ctx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) this.ctx = new AC(); }
+        if (this.ctx && this.ctx.state === "suspended") this.ctx.resume().catch(() => {});
+        return this.ctx;
+      },
+      tone(freq, dur = 0.14, type = "triangle", gainVal = 0.14, delay = 0) {
+        const ctx = this._ensure(); if (!ctx) return;
+        const t = ctx.currentTime + delay; const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = type; osc.frequency.setValueAtTime(freq, t);
+        g.gain.setValueAtTime(gainVal, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+        osc.connect(g); g.connect(ctx.destination); osc.start(t); osc.stop(t + dur);
+      },
+      spotFound(combo = 1) { const b = 523.25 * Math.pow(1.06, Math.min(combo - 1, 6)); this.tone(b, 0.12, "triangle", 0.16, 0); this.tone(b * 1.25, 0.18, "triangle", 0.16, 0.08); },
+      miss() { this.tone(180, 0.16, "sawtooth", 0.12, 0); this.tone(130, 0.2, "sawtooth", 0.12, 0.08); },
+      hint() { this.tone(880, 0.1, "sine", 0.12, 0); this.tone(1174, 0.22, "sine", 0.12, 0.09); },
+      tick() { this.tone(740, 0.05, "square", 0.05, 0); },
+      fanfare() { [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => this.tone(f, 0.22, "triangle", 0.16, i * 0.11)); },
+    };
+
+    const app = {
+      role: null, roomCode: "", clientId: "", playerName: "", team: "red",
+      workerUrl: DEFAULT_WORKER_WS_URL, ws: null, connected: false, _reconnecting: false,
+      pingTimer: null, tickTimer: null, lastTickSec: -1, serverOffsetMs: 0, cooldownUntil: 0,
+      feed: [],
+      config: { gameMode: "shared_race", teamMode: false, roundCount: 6, roundDurationSec: 75, wrongTapCooldownMs: 2000, selectedSceneIds: SCENES.map((s) => s.id) },
+      roomState: null, localEngine: null,
+    };
+
+    function genId(p) { return `${p}_${Math.random().toString(36).slice(2, 9)}`; }
+    function genRoomCode() { const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let o = ""; for (let i = 0; i < 4; i++) o += c[Math.floor(Math.random() * c.length)]; return o; }
+    function showToast(msg, kind = "") {
+      const el = document.createElement("div"); el.className = `toast ${kind}`; el.textContent = msg;
+      document.getElementById("toast-stack").appendChild(el); setTimeout(() => el.remove(), 2400);
+    }
+    function pushFeed(text) {
+      app.feed.unshift({ text, ts: new Date().toLocaleTimeString("zh-HK", { hour12: false, minute: "2-digit", second: "2-digit" }) });
+      if (app.feed.length > 25) app.feed.pop(); renderFeed();
+    }
+    function renderFeed() {
+      const el = document.getElementById("event-feed"); if (!el) return;
+      el.innerHTML = app.feed.length === 0 ? `<div style="color:var(--text-muted); font-size:0.85rem;">未有戰況紀錄...</div>`
+        : app.feed.map((f) => `<div class="feed-item"><span style="color:var(--text-muted); margin-right:6px;">${escapeHtml(f.ts)}</span>${escapeHtml(f.text)}</div>`).join("");
+    }
+    function saveLocalSession() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ role: app.role, roomCode: app.roomCode, clientId: app.clientId, playerName: app.playerName, team: app.team, workerUrl: app.workerUrl, config: app.config })); } catch (_e) {}
+    }
+    function loadLocalSession() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); if (!parsed) return;
+        if (parsed.clientId) app.clientId = parsed.clientId;
+        if (parsed.playerName) app.playerName = parsed.playerName;
+        if (parsed.team && TEAM_INFO[parsed.team]) app.team = parsed.team;
+        if (parsed.workerUrl) app.workerUrl = parsed.workerUrl;
+        if (parsed.config && typeof parsed.config === "object") app.config = { ...app.config, ...parsed.config };
+      } catch (_e) {}
+    }
+    function buildSelectedRounds() {
+      const selectedSet = new Set(app.config.selectedSceneIds || []);
+      let pool = SCENES.filter((s) => selectedSet.has(s.id)); if (pool.length === 0) pool = [...SCENES];
+      const count = Math.max(1, Math.min(pool.length, Number(app.config.roundCount) || 6));
+      return pool.slice(0, count).map((s) => ({ sceneId: s.id, title: s.title, difficulty: s.difficulty, diffs: s.diffs.map((d) => ({ ...d })) }));
+    }
+    function createLocalState() {
+      return {
+        roomCode: app.roomCode || "DEMO", phase: "lobby", config: { ...app.config }, rounds: [], currentRoundIndex: 0,
+        roundStartTime: 0, roundEndTime: 0, paused: false, pausedRemainingMs: 0, claimedDiffs: {}, revealedHints: [], finishOrder: [],
+        players: [{ id: app.clientId, name: app.playerName || "試玩玩家", team: app.team || "red", score: 0, roundScore: 0, foundDiffIds: [], finishedAt: null, combo: 0, lastWrongAt: 0, connected: true }],
+      };
+    }
+    function syncLocalToRoomState() {
+      const st = app.localEngine; if (!st) return;
+      const round = st.rounds[st.currentRoundIndex] || null;
+      const isReveal = st.phase === "round_summary" || st.phase === "finished";
+      const sorted = [...st.players].sort((a, b) => b.score - a.score);
+      const playersOut = sorted.map((p, i) => ({ id: p.id, name: p.name, team: p.team, score: p.score, roundScore: p.roundScore, foundCount: p.foundDiffIds.length, finishedAt: p.finishedAt, combo: p.combo, connected: true, rank: i + 1 }));
+      const myP = st.players.find((p) => p.id === app.clientId);
+      app.roomState = {
+        roomCode: st.roomCode, phase: st.phase, config: { ...st.config },
+        currentRound: round ? { index: st.currentRoundIndex, totalRounds: st.rounds.length, sceneId: round.sceneId, title: round.title, difficulty: round.difficulty, totalDiffs: round.diffs.length, diffs: isReveal ? round.diffs : [] } : null,
+        roundStartTime: st.roundStartTime, roundEndTime: st.roundEndTime, paused: st.paused, pausedRemainingMs: st.pausedRemainingMs,
+        claimedDiffs: { ...st.claimedDiffs }, revealedHints: [...st.revealedHints], finishOrder: [...st.finishOrder], players: playersOut,
+        teamLeaderboard: [{ id: "red", name: "紅隊", color: "#FF4D4D", score: myP ? myP.score : 0, members: 1, rank: 1 }],
+        myFoundDiffs: myP && round ? round.diffs.filter((d) => myP.foundDiffIds.includes(d.id)) : [],
+      };
+      renderApp();
+    }
+    function beginLocalRound(idx, now) {
+      const st = app.localEngine; st.currentRoundIndex = idx; st.phase = "playing"; st.paused = false;
+      st.roundStartTime = now; st.roundEndTime = now + st.config.roundDurationSec * 1000;
+      st.claimedDiffs = {}; st.revealedHints = []; st.finishOrder = [];
+      st.players.forEach((p) => { p.foundDiffIds = []; p.finishedAt = null; p.combo = 0; p.lastWrongAt = 0; });
+      syncLocalToRoomState();
+    }
+    function handleLocalAction(msg) {
+      const st = app.localEngine; if (!st) return; const now = Date.now(); const me = st.players[0];
+      if (msg.type === "update_config") { st.config = { ...st.config, ...msg.config }; syncLocalToRoomState(); }
+      else if (msg.type === "start_game") { st.config = { ...st.config, ...(msg.config || {}) }; st.rounds = msg.rounds; st.currentRoundIndex = 0; me.score = 0; beginLocalRound(0, now); }
+      else if (msg.type === "spot_tap") {
+        if (st.phase !== "playing" || st.paused) return;
+        const round = st.rounds[st.currentRoundIndex]; if (!round) return;
+        if (st.config.wrongTapCooldownMs > 0 && now - me.lastWrongAt < st.config.wrongTapCooldownMs) return;
+        let hit = null, best = Infinity;
+        for (const d of round.diffs) { const r = Math.max(d.r, 24); const dsq = (msg.x - d.x) ** 2 + (msg.y - d.y) ** 2; if (dsq <= r * r && dsq < best) { best = dsq; hit = d; } }
+        if (!hit) { me.lastWrongAt = now; me.combo = 0; triggerCooldownVisual(st.config.wrongTapCooldownMs); SFX.miss(); return; }
+        if (st.config.gameMode === "shared_race") {
+          if (st.claimedDiffs[hit.id]) return;
+          me.combo += 1;
+          const pts = 100 + Math.round((1 - Math.min(1, (now - st.roundStartTime) / (st.config.roundDurationSec * 1000))) * 50) + Math.min(me.combo - 1, 4) * 15;
+          st.claimedDiffs[hit.id] = { playerId: me.id, playerName: me.name, team: me.team, points: pts, x: hit.x, y: hit.y, r: hit.r, label: hit.label };
+          me.foundDiffIds.push(hit.id); me.score += pts; SFX.spotFound(me.combo);
+          showToast(`🎯 搵到「${hit.label}」+${pts} 分！`, "success"); pushFeed(`${me.name} 搶到「${hit.label}」(+${pts})`);
+          if (Object.keys(st.claimedDiffs).length >= round.diffs.length) { st.phase = "round_summary"; SFX.fanfare(); }
+          syncLocalToRoomState();
+        } else {
+          if (me.foundDiffIds.includes(hit.id)) return;
+          me.foundDiffIds.push(hit.id); me.combo += 1; let pts = 100;
+          if (me.foundDiffIds.length >= round.diffs.length) {
+            me.finishedAt = now; st.finishOrder.push(me.id);
+            const bonus = 150 + Math.round(Math.max(0, (st.roundEndTime - now) / 1000) * 2); pts += bonus;
+            st.phase = "round_summary"; SFX.fanfare(); showToast(`🏁 全部搵齊！完賽獎金 +${bonus} 分！`, "success");
+          } else { SFX.spotFound(me.combo); showToast(`✅ 搵到「${hit.label}」+${pts} 分！`, "success"); }
+          me.score += pts; pushFeed(`${me.name} 搵到「${hit.label}」(${me.foundDiffIds.length}/${round.diffs.length})`); syncLocalToRoomState();
+        }
+      } else if (msg.type === "host_pause_toggle") {
+        if (st.phase !== "playing") return;
+        if (!st.paused) { st.paused = true; st.pausedRemainingMs = Math.max(0, st.roundEndTime - now); }
+        else { st.paused = false; st.roundEndTime = now + st.pausedRemainingMs; }
+        syncLocalToRoomState();
+      } else if (msg.type === "host_reveal_hint") {
+        const round = st.rounds[st.currentRoundIndex]; if (!round || st.phase !== "playing") return;
+        const unfound = round.diffs.find((d) => !st.revealedHints.includes(d.id) && !me.foundDiffIds.includes(d.id));
+        if (unfound) { st.revealedHints.push(unfound.id); SFX.hint(); showToast(`💡 提示已閃燈：${unfound.label}`, ""); syncLocalToRoomState(); }
+      } else if (msg.type === "host_end_round") { if (st.phase === "playing") { st.phase = "round_summary"; syncLocalToRoomState(); } }
+      else if (msg.type === "host_next_round") {
+        if (st.phase !== "round_summary") return;
+        if (st.currentRoundIndex + 1 >= st.rounds.length) { st.phase = "finished"; SFX.fanfare(); syncLocalToRoomState(); }
+        else beginLocalRound(st.currentRoundIndex + 1, now);
+      } else if (msg.type === "host_finish_game") { st.phase = "finished"; SFX.fanfare(); syncLocalToRoomState(); }
+      else if (msg.type === "host_adjust_score") { me.score = Math.max(0, me.score + (Number(msg.delta) || 0)); syncLocalToRoomState(); }
+      else if (msg.type === "host_reset_game") { st.phase = "lobby"; me.score = 0; me.foundDiffIds = []; syncLocalToRoomState(); }
+    }
+
+    function sendAction(payload) {
+      if (app.role === "local") { handleLocalAction(payload); return; }
+      if (app.ws && app.ws.readyState === WebSocket.OPEN) app.ws.send(JSON.stringify(payload));
+      else showToast("⚠️ 連線中斷，正嘗試重連...", "error");
+    }
+
+    function connectWebSocket(onFailFallback) {
+      if (app.ws) { try { app.ws.close(); } catch (_e) {} app.ws = null; }
+      if (app.pingTimer) clearInterval(app.pingTimer);
+      const base = (app.workerUrl || DEFAULT_WORKER_WS_URL).replace(/\/+$/, "");
+      const wsUrl = `${base}/ws?room=${encodeURIComponent(app.roomCode)}`;
+      let opened = false;
+      try { app.ws = new WebSocket(wsUrl); } catch (_e) { if (onFailFallback) onFailFallback(); return; }
+      const failTimer = setTimeout(() => { if (!opened && onFailFallback) { try { app.ws.close(); } catch (_e) {} onFailFallback(); } }, 3500);
+      app.ws.onopen = () => {
+        opened = true; clearTimeout(failTimer); app.connected = true; updateConnBadge("🟢 已連線");
+        if (app.role === "host") sendAction({ type: "join_host", hostId: app.clientId, roomCode: app.roomCode, config: app.config });
+        else if (app.role === "player") sendAction({ type: "join_player", playerId: app.clientId, name: app.playerName, team: app.team });
+        app.pingTimer = setInterval(() => { if (app.ws && app.ws.readyState === WebSocket.OPEN) app.ws.send(JSON.stringify({ type: "ping" })); }, 25000);
+      };
+      app.ws.onmessage = (evt) => { try { handleServerMessage(JSON.parse(evt.data)); } catch (_e) {} };
+      app.ws.onclose = () => {
+        app.connected = false; if (app.pingTimer) clearInterval(app.pingTimer);
+        if (app.role === "host" || app.role === "player") {
+          updateConnBadge("🟠 重連中...");
+          if (!app._reconnecting) {
+            app._reconnecting = true;
+            setTimeout(() => { app._reconnecting = false; if (app.role === "host" || app.role === "player") connectWebSocket(); }, 2200);
+          }
+        }
+      };
+      app.ws.onerror = () => { if (!opened) { clearTimeout(failTimer); if (onFailFallback) onFailFallback(); } };
+    }
+
+    function handleServerMessage(msg) {
+      if (msg.type === "pong") { if (msg.serverTime) app.serverOffsetMs = msg.serverTime - Date.now(); return; }
+      if (msg.type === "error") { showToast(`⚠️ ${msg.message || "發生錯誤"}`, "error"); return; }
+      if (msg.type === "kicked") { showToast("你已被主持移出房間", "error"); resetToLanding(); return; }
+      if (msg.type === "tap_miss") { SFX.miss(); triggerCooldownVisual(msg.cooldownMs || 2000); return; }
+      if (msg.type === "already_claimed") { showToast(`⚡ 慢咗半步！已被 ${msg.by} 搶先搵到`, ""); return; }
+      if (msg.type === "diff_claimed") { SFX.spotFound(msg.combo || 1); showToast(`🎯 ${msg.playerName} 搶中「${msg.label}」+${msg.points} 分！`, "success"); pushFeed(`${msg.playerName} 搶中「${msg.label}」(+${msg.points})`); return; }
+      if (msg.type === "solo_diff_found") {
+        if (msg.finished) { SFX.fanfare(); showToast(`🏁 全部搵齊！完賽獎金 +${msg.finishBonus} 分！`, "success"); }
+        else { SFX.spotFound(msg.foundCount || 1); showToast(`✅ 搵到「${msg.label}」(${msg.foundCount}/${msg.totalCount})`, "success"); }
+        return;
+      }
+      if (msg.type === "player_finished") { pushFeed(`🏁 ${msg.playerName} 第 ${msg.finishRank} 名搵齊全關！(獎金 +${msg.finishBonus})`); if (app.role === "host") SFX.fanfare(); return; }
+      if (msg.type === "hint_revealed") { SFX.hint(); showToast(`💡 主持發放提示：${msg.label}`, ""); pushFeed(`💡 提示：${msg.label}`); return; }
+      if (msg.type === "state_sync") {
+        if (msg.serverTime) app.serverOffsetMs = msg.serverTime - Date.now();
+        const prevPhase = app.roomState?.phase; app.roomState = msg.state;
+        if (msg.state.config) app.config = { ...app.config, ...msg.state.config };
+        if (prevPhase === "playing" && (msg.state.phase === "round_summary" || msg.state.phase === "finished")) SFX.fanfare();
+        renderApp();
+      }
+    }
+
+    function updateConnBadge(text) {
+      const el = document.getElementById("nav-conn-pill");
+      if (!text) { el.classList.add("hidden"); return; }
+      el.textContent = text; el.classList.remove("hidden");
+    }
+
+    function renderApp() {
+      ["view-landing", "view-lobby", "view-playing", "view-finished"].forEach((id) => document.getElementById(id).classList.add("hidden"));
+      const navRoom = document.getElementById("nav-room-pill");
+      if (!app.role || !app.roomState) { document.getElementById("view-landing").classList.remove("hidden"); navRoom.classList.add("hidden"); return; }
+      navRoom.classList.remove("hidden");
+      document.getElementById("nav-room-code").textContent = app.roomState.roomCode || app.roomCode;
+      const phase = app.roomState.phase;
+      if (phase === "lobby") { document.getElementById("view-lobby").classList.remove("hidden"); renderLobby(); }
+      else if (phase === "playing" || phase === "round_summary") { document.getElementById("view-playing").classList.remove("hidden"); renderPlaying(); }
+      else if (phase === "finished") { document.getElementById("view-finished").classList.remove("hidden"); renderFinished(); }
+      renderHostManageList();
+    }
+
+    function renderLobby() {
+      const st = app.roomState; document.getElementById("lobby-room-code").textContent = st.roomCode;
+      const isHost = app.role === "host" || app.role === "local";
+      document.getElementById("lobby-host-controls").classList.toggle("hidden", !isHost);
+      document.getElementById("lobby-player-wait").classList.toggle("hidden", isHost);
+      const modeText = st.config.gameMode === "shared_race" ? "⚡ 全場即時搶點" : "🏁 各自鬥快搵齊";
+      const teamText = st.config.teamMode ? "🏳️ 紅藍黃綠分組賽" : "🧑 個人積分賽";
+      document.getElementById("lobby-mode-summary").innerHTML = `玩法：<strong>${modeText}</strong> ｜ 計分：<strong>${teamText}</strong><br/>關數：<strong>${st.config.roundCount} 關</strong> ｜ 每關限時：<strong>${st.config.roundDurationSec} 秒</strong> ｜ 撳錯冷卻：<strong>${st.config.wrongTapCooldownMs / 1000} 秒</strong>`;
+      const players = st.players || []; document.getElementById("lobby-player-count").textContent = players.length;
+      document.getElementById("lobby-players-list").innerHTML = players.length === 0 ? `<div style="color:var(--text-muted); font-weight:700;">等待團友掃描 QR Code 入房...</div>`
+        : players.map((p) => `<span class="player-chip" style="${p.connected ? "" : "opacity:0.45;"}">${st.config.teamMode ? `<span class="dot-team" style="background:${(TEAM_INFO[p.team] || TEAM_INFO.red).color};"></span>` : ""}${escapeHtml(p.name)}</span>`).join("");
+      const box = document.getElementById("lobby-qr-mini");
+      if (box && box.dataset.code !== app.roomCode) {
+        box.innerHTML = ""; box.dataset.code = app.roomCode;
+        if (window.QRCode) new QRCode(box, { text: getJoinUrl(), width: 88, height: 88, colorDark: "#111111", colorLight: "#FFFFFF" });
+        else box.textContent = app.roomCode;
+      }
+    }
+
+    function renderPlaying() {
+      const st = app.roomState; const round = st.currentRound; if (!round) return;
+      const scene = SCENES.find((s) => s.id === round.sceneId) || SCENES[0];
+      document.getElementById("hud-round-pill").textContent = `第 ${round.index + 1} / ${round.totalRounds} 關`;
+      document.getElementById("hud-scene-title").textContent = scene.title;
+      document.getElementById("hud-style-pill").textContent = scene.style;
+      const diffEl = document.getElementById("hud-diff-pill");
+      diffEl.textContent = scene.diffLabel;
+      diffEl.className = `diff-badge ${scene.difficulty === "hard" ? "hard" : scene.difficulty === "nightmare" ? "nightmare" : ""}`;
+      document.getElementById("hud-mode-pill").textContent = st.config.gameMode === "shared_race" ? "⚡ 全場搶點" : "🏁 各自鬥快";
+
+      const isReveal = st.phase === "round_summary";
+      const markers = [];
+      if (isReveal) {
+        ((round.diffs && round.diffs.length > 0) ? round.diffs : scene.diffs).forEach((d, idx) => {
+          const claim = st.claimedDiffs[d.id];
+          markers.push({ x: d.x, y: d.y, r: Math.max(d.r, 20), color: claim ? "#22C55E" : "#FF4D4D", tag: claim ? claim.playerName : `#${idx + 1}` });
+        });
+      } else if (st.config.gameMode === "shared_race") {
+        Object.values(st.claimedDiffs || {}).forEach((c) => markers.push({ x: c.x, y: c.y, r: Math.max(c.r || 22, 20), color: "#22C55E", tag: c.playerName }));
+      } else {
+        (st.myFoundDiffs || []).forEach((d) => markers.push({ x: d.x, y: d.y, r: Math.max(d.r, 20), color: "#22C55E", tag: "✓" }));
+      }
+
+      const hintRings = (st.revealedHints || []).map((id) => scene.diffs.find((d) => d.id === id)).filter(Boolean)
+        .filter((d) => !(st.config.gameMode === "shared_race" && st.claimedDiffs[d.id]));
+
+      const foundCount = st.config.gameMode === "shared_race" ? Object.keys(st.claimedDiffs || {}).length : (st.myFoundDiffs || []).length;
+      document.getElementById("hud-found-pill").textContent = `已搵 ${foundCount} / ${round.totalDiffs}`;
+
+      const overlaySvg = `
+        ${hintRings.map((h) => `<circle cx="${h.x}" cy="${h.y}" r="${Math.max(h.r, 24)}" fill="#FFE500" fill-opacity="0.28" stroke="#FFE500" stroke-width="4" stroke-dasharray="6 4"/>`).join("")}
+        ${markers.map((m) => `
+          <circle cx="${m.x}" cy="${m.y}" r="${m.r}" fill="${m.color}" fill-opacity="0.18" stroke="${m.color}" stroke-width="4"/>
+          <circle cx="${m.x}" cy="${m.y}" r="${m.r + 2}" fill="none" stroke="#111111" stroke-width="1.5"/>
+          <rect x="${Math.max(4, Math.min(288, m.x - 34))}" y="${Math.max(4, m.y - m.r - 18)}" width="68" height="16" rx="5" fill="#111111"/>
+          <text x="${Math.max(38, Math.min(322, m.x))}" y="${Math.max(15, m.y - m.r - 7)}" text-anchor="middle" font-size="9.5" font-weight="900" fill="#FFE500">${escapeHtml(String(m.tag).slice(0, 7))}</text>
+        `).join("")}
+      `;
+      document.getElementById("svg-left").innerHTML = scene.render(false) + overlaySvg;
+      document.getElementById("svg-right").innerHTML = scene.render(true) + overlaySvg;
+
+      const sumCard = document.getElementById("round-summary-card");
+      sumCard.classList.toggle("hidden", !isReveal);
+      if (isReveal) {
+        const allDiffs = (round.diffs && round.diffs.length > 0) ? round.diffs : scene.diffs;
+        document.getElementById("round-answers-list").innerHTML = allDiffs.map((d, i) => `<span><strong>#${i + 1}</strong> ${escapeHtml(d.label)}</span>`).join(" ｜ ");
+        document.getElementById("round-summary-host-btns").classList.toggle("hidden", !(app.role === "host" || app.role === "local"));
+        document.getElementById("btn-next-round").textContent = round.index + 1 >= round.totalRounds ? "🏆 查看終極總結算" : "➡️ 進入下一關";
+      }
+      renderLiveLeaderboard();
+      updateTimerDisplay();
+    }
+
+    function renderLiveLeaderboard() {
+      const st = app.roomState; const container = document.getElementById("live-leaderboard");
+      const showTeams = st.config.teamMode && st.teamLeaderboard && st.teamLeaderboard.length > 0;
+      const rows = showTeams ? st.teamLeaderboard : (st.players || []);
+      document.getElementById("lb-heading").textContent = showTeams ? "🏳️ 組別排行榜" : "🏆 即時排行榜";
+      document.getElementById("lb-count-badge").textContent = showTeams ? `${rows.length} 組` : `${rows.length} 人`;
+      const totalDiffs = st.currentRound?.totalDiffs || 1;
+      container.innerHTML = rows.length === 0 ? `<div style="color:var(--text-muted); font-size:0.86rem;">未有玩家加入</div>`
+        : rows.slice(0, 12).map((item) => {
+            const isMe = !showTeams && item.id === app.clientId;
+            const finished = !showTeams && item.finishedAt !== null;
+            const pct = Math.min(100, Math.round(((item.foundCount || 0) / totalDiffs) * 100));
+            return `<div class="lb-row ${isMe ? "me" : ""} ${finished ? "finished" : ""}"><div style="flex:1; min-width:0;"><div style="display:flex; align-items:center; gap:6px;"><span class="tabular">#${item.rank}</span>${showTeams ? `<span class="dot-team" style="background:${item.color};"></span>` : ""}<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(item.name)}</span>${finished ? `<span>🏁</span>` : ""}</div>${!showTeams && st.config.gameMode === "solo_sprint" ? `<div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${pct}%;"></div></div>` : ""}</div><div class="tabular" style="font-size:1rem;">${item.score} 分</div></div>`;
+          }).join("");
+    }
+
+    function renderFinished() {
+      const st = app.roomState;
+      const showTeams = st.config.teamMode && st.teamLeaderboard && st.teamLeaderboard.length > 0;
+      const list = showTeams ? st.teamLeaderboard : (st.players || []);
+      const medals = ["🥇", "🥈", "🥉"];
+      document.getElementById("podium-grid").innerHTML = list.slice(0, 3).map((item, idx) => `
+        <div class="podium-card rank-${idx + 1}">
+          <div style="font-size:2.4rem;">${medals[idx] || "🏅"}</div>
+          <div style="font-size:1.25rem; font-weight:900; margin:6px 0;">${escapeHtml(item.name)}</div>
+          <div class="tabular" style="font-size:1.5rem; font-weight:900;">${item.score} 分</div>
+          <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">第 ${item.rank} 名</div>
+        </div>
+      `).join("");
+      document.getElementById("final-full-list").innerHTML = list.slice(3).map((item) => `<div class="lb-row"><span>#${item.rank} ${escapeHtml(item.name)}</span><span class="tabular">${item.score} 分</span></div>`).join("");
+      document.getElementById("btn-play-again").classList.toggle("hidden", !(app.role === "host" || app.role === "local"));
+    }
+
+    function renderHostManageList() {
+      const box = document.getElementById("host-player-manage-list"); const players = app.roomState?.players || []; if (!box) return;
+      box.innerHTML = players.length === 0 ? `<div style="color:var(--text-muted);">目前未有玩家</div>`
+        : players.map((p) => `<div class="lb-row"><span>${escapeHtml(p.name)}（<strong class="tabular">${p.score}</strong> 分）</span><div style="display:flex; gap:6px;"><button class="btn btn-mint" style="min-height:32px; padding:4px 8px;" data-adj="${escapeHtml(p.id)}" data-delta="50">+50</button><button class="btn btn-yellow" style="min-height:32px; padding:4px 8px;" data-adj="${escapeHtml(p.id)}" data-delta="-50">-50</button><button class="btn btn-coral" style="min-height:32px; padding:4px 8px;" data-kick="${escapeHtml(p.id)}">踢出</button></div></div>`).join("");
+    }
+
+    function updateTimerDisplay() {
+      const st = app.roomState; const el = document.getElementById("hud-timer");
+      if (!st || !el || st.phase !== "playing") { if (el && st?.phase === "round_summary") { el.textContent = "完關"; el.classList.remove("urgent"); } return; }
+      if (st.paused) { el.textContent = `⏸ ${Math.ceil((st.pausedRemainingMs || 0) / 1000)}s`; el.classList.remove("urgent"); return; }
+      const remMs = Math.max(0, (st.roundEndTime || 0) - (Date.now() + app.serverOffsetMs));
+      const sec = Math.ceil(remMs / 1000);
+      el.textContent = `${sec}s`; el.classList.toggle("urgent", sec <= 10 && sec > 0);
+      if (sec <= 10 && sec > 0 && sec !== app.lastTickSec) { app.lastTickSec = sec; SFX.tick(); }
+      if (remMs <= 0 && app.role === "local" && app.localEngine?.phase === "playing") { app.localEngine.phase = "round_summary"; SFX.fanfare(); syncLocalToRoomState(); }
+    }
+
+    function triggerCooldownVisual(ms) {
+      if (!ms || ms <= 0) return;
+      app.cooldownUntil = Date.now() + ms;
+      const cL = document.getElementById("cooldown-left"), cR = document.getElementById("cooldown-right");
+      cL.classList.remove("hidden"); cR.classList.remove("hidden");
+      setTimeout(() => { if (Date.now() >= app.cooldownUntil - 30) { cL.classList.add("hidden"); cR.classList.add("hidden"); } }, ms);
+    }
+
+    function handleBoardClick(evt) {
+      if (!app.roomState || app.roomState.phase !== "playing" || app.roomState.paused) return;
+      if (app.role === "host") { showToast("📺 主持大螢幕為觀戰畫面，請團友用手機點擊搶答！", ""); return; }
+      if (Date.now() < app.cooldownUntil) return;
+      const rect = evt.currentTarget.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = ((evt.clientX - rect.left) / rect.width) * 360;
+      const y = ((evt.clientY - rect.top) / rect.height) * 260;
+      sendAction({ type: "spot_tap", x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
+    }
+
+    function getJoinUrl() {
+      const url = new URL(window.location.href);
+      if (app.roomCode) url.searchParams.set("room", app.roomCode);
+      return url.toString();
+    }
+
+    function openQRModal() {
+      const box = document.getElementById("qr-canvas-box"); box.innerHTML = "";
+      const url = getJoinUrl();
+      document.getElementById("qr-room-label").textContent = app.roomCode ? `房號：${app.roomCode}` : "掃描開啟遊戲網頁";
+      document.getElementById("qr-url-text").textContent = url;
+      if (window.QRCode) new QRCode(box, { text: url, width: 220, height: 220, colorDark: "#111111", colorLight: "#FFFFFF" });
+      else box.textContent = url;
+      document.getElementById("modal-qr").classList.remove("hidden");
+    }
+
+    function openSettingsModal() {
+      document.querySelectorAll("#cfg-game-mode .seg-btn").forEach((b) => b.classList.toggle("active", b.dataset.val === app.config.gameMode));
+      document.querySelectorAll("#cfg-team-mode .seg-btn").forEach((b) => b.classList.toggle("active", b.dataset.val === String(app.config.teamMode)));
+      document.getElementById("cfg-round-count").value = app.config.roundCount;
+      document.getElementById("cfg-round-count-val").textContent = `${app.config.roundCount} 關`;
+      document.querySelectorAll("#cfg-duration .seg-btn").forEach((b) => b.classList.toggle("active", Number(b.dataset.val) === Number(app.config.roundDurationSec)));
+      document.querySelectorAll("#cfg-cooldown .seg-btn").forEach((b) => b.classList.toggle("active", Number(b.dataset.val) === Number(app.config.wrongTapCooldownMs)));
+      document.getElementById("cfg-worker-url").value = app.workerUrl || DEFAULT_WORKER_WS_URL;
+      renderSettingsSceneGrid();
+      document.getElementById("modal-settings").classList.remove("hidden");
+    }
+
+    function renderSettingsSceneGrid() {
+      const selected = new Set(app.config.selectedSceneIds || SCENES.map((s) => s.id));
+      document.getElementById("settings-scene-grid").innerHTML = SCENES.map((s) => `
+        <div class="scene-option ${selected.has(s.id) ? "selected" : ""}" data-scene-id="${s.id}">
+          <div style="display:flex; justify-content:space-between; align-items:center;"><strong>${escapeHtml(s.title)}</strong><span>${selected.has(s.id) ? "✅" : "⬜"}</span></div>
+          <div style="font-size:0.78rem; color:var(--text-muted);">${escapeHtml(s.style)}・${s.diffs.length} 處不同</div>
+          <span class="diff-badge ${s.difficulty === "hard" ? "hard" : s.difficulty === "nightmare" ? "nightmare" : ""}" style="align-self:flex-start;">${s.diffLabel}</span>
+        </div>
+      `).join("");
+    }
+
+    function resetToLanding() {
+      if (app.ws) { try { app.ws.close(); } catch (_e) {} app.ws = null; }
+      if (app.pingTimer) clearInterval(app.pingTimer);
+      app.role = null; app.roomCode = ""; app.roomState = null; app.localEngine = null; app.feed = [];
+      updateConnBadge(""); renderApp();
+    }
+
+    function init() {
+      loadLocalSession(); if (!app.clientId) app.clientId = genId("usr");
+      const urlRoom = (new URLSearchParams(window.location.search).get("room") || "").trim().toUpperCase();
+      if (urlRoom) document.getElementById("join-room-input").value = urlRoom;
+      if (app.playerName) document.getElementById("join-name-input").value = app.playerName;
+
+      document.getElementById("join-team-picker").addEventListener("click", (e) => {
+        const btn = e.target.closest(".team-chip"); if (!btn) return;
+        document.querySelectorAll("#join-team-picker .team-chip").forEach((c) => c.classList.remove("active"));
+        btn.classList.add("active"); app.team = btn.dataset.team;
+      });
+      document.getElementById("btn-create-room").addEventListener("click", () => {
+        app.role = "host"; app.roomCode = genRoomCode(); saveLocalSession();
+        connectWebSocket(() => { showToast("⚠️ 未偵測到連線伺服器，已自動切換至單機試玩／投影模式", ""); app.role = "local"; app.localEngine = createLocalState(); updateConnBadge("🟡 單機試玩"); syncLocalToRoomState(); });
+      });
+      document.getElementById("btn-join-room").addEventListener("click", () => {
+        const code = document.getElementById("join-room-input").value.trim().toUpperCase();
+        const name = document.getElementById("join-name-input").value.trim();
+        if (code.length < 2) { showToast("請輸入有效房號", "error"); return; }
+        if (!name) { showToast("請輸入你嘅暱稱", "error"); return; }
+        app.role = "player"; app.roomCode = code; app.playerName = name; saveLocalSession();
+        connectWebSocket(() => { showToast("❌ 無法連線至房間伺服器，請確認後端已部署或檢查設定", "error"); resetToLanding(); });
+      });
+      document.getElementById("btn-local-demo").addEventListener("click", () => {
+        app.role = "local"; app.roomCode = "DEMO"; app.playerName = app.playerName || "試玩玩家";
+        app.localEngine = createLocalState(); updateConnBadge("🟡 單機試玩"); syncLocalToRoomState();
+      });
+      document.getElementById("btn-start-game").addEventListener("click", () => sendAction({ type: "start_game", config: app.config, rounds: buildSelectedRounds() }));
+      document.getElementById("btn-open-settings-lobby").addEventListener("click", openSettingsModal);
+      document.getElementById("svg-left").addEventListener("click", handleBoardClick);
+      document.getElementById("svg-right").addEventListener("click", handleBoardClick);
+      document.getElementById("btn-next-round").addEventListener("click", () => sendAction({ type: "host_next_round" }));
+      document.getElementById("btn-play-again").addEventListener("click", () => sendAction({ type: "host_reset_game" }));
+      document.getElementById("btn-mute").addEventListener("click", (e) => { SFX.muted = !SFX.muted; e.currentTarget.textContent = SFX.muted ? "🔇" : "🔊"; });
+      document.getElementById("btn-qr").addEventListener("click", openQRModal);
+      document.getElementById("btn-rules").addEventListener("click", () => document.getElementById("modal-rules").classList.remove("hidden"));
+      document.getElementById("btn-settings").addEventListener("click", openSettingsModal);
+      document.getElementById("btn-host-drawer").addEventListener("click", () => {
+        if (app.role === "player") { showToast("只有主持先可以開啟主持後台", "error"); return; }
+        renderHostManageList(); document.getElementById("modal-host").classList.remove("hidden");
+      });
+      document.getElementById("btn-restart").addEventListener("click", () => { if (app.role === "host" || app.role === "local") sendAction({ type: "host_reset_game" }); else resetToLanding(); });
+      document.getElementById("btn-copy-join-url").addEventListener("click", () => navigator.clipboard?.writeText(getJoinUrl()).then(() => showToast("✅ 已複製入房連結！", "success")));
+      document.querySelectorAll("[data-close-modal]").forEach((btn) => btn.addEventListener("click", () => document.getElementById(btn.dataset.closeModal).classList.add("hidden")));
+      ["cfg-game-mode", "cfg-team-mode", "cfg-duration", "cfg-cooldown"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", (e) => {
+          const btn = e.target.closest(".seg-btn"); if (!btn) return;
+          document.querySelectorAll(`#${id} .seg-btn`).forEach((b) => b.classList.remove("active")); btn.classList.add("active");
+        });
+      });
+      document.getElementById("cfg-round-count").addEventListener("input", (e) => { document.getElementById("cfg-round-count-val").textContent = `${e.target.value} 關`; });
+      document.getElementById("settings-scene-grid").addEventListener("click", (e) => {
+        const card = e.target.closest(".scene-option"); if (!card) return;
+        const set = new Set(app.config.selectedSceneIds || SCENES.map((s) => s.id));
+        if (set.has(card.dataset.sceneId)) { if (set.size > 1) set.delete(card.dataset.sceneId); } else set.add(card.dataset.sceneId);
+        app.config.selectedSceneIds = SCENES.map((s) => s.id).filter((sid) => set.has(sid));
+        renderSettingsSceneGrid();
+      });
+      document.getElementById("btn-select-all-scenes").addEventListener("click", () => { app.config.selectedSceneIds = SCENES.map((s) => s.id); renderSettingsSceneGrid(); });
+      document.getElementById("btn-select-hard-scenes").addEventListener("click", () => { app.config.selectedSceneIds = SCENES.filter((s) => s.difficulty === "hard" || s.difficulty === "nightmare").map((s) => s.id); renderSettingsSceneGrid(); });
+      document.getElementById("btn-save-settings").addEventListener("click", () => {
+        app.config.gameMode = document.querySelector("#cfg-game-mode .seg-btn.active")?.dataset.val || "shared_race";
+        app.config.teamMode = document.querySelector("#cfg-team-mode .seg-btn.active")?.dataset.val === "true";
+        app.config.roundCount = Number(document.getElementById("cfg-round-count").value) || 6;
+        app.config.roundDurationSec = Number(document.querySelector("#cfg-duration .seg-btn.active")?.dataset.val) || 75;
+        app.config.wrongTapCooldownMs = Number(document.querySelector("#cfg-cooldown .seg-btn.active")?.dataset.val ?? 2000);
+        const wUrl = document.getElementById("cfg-worker-url").value.trim(); if (wUrl) app.workerUrl = wUrl;
+        saveLocalSession();
+        if (app.role === "host" || app.role === "local") sendAction({ type: "update_config", config: app.config });
+        document.getElementById("modal-settings").classList.add("hidden"); showToast("✅ 已更新遊戲設定！", "success");
+      });
+      document.getElementById("host-btn-pause").addEventListener("click", () => sendAction({ type: "host_pause_toggle" }));
+      document.getElementById("host-btn-hint").addEventListener("click", () => sendAction({ type: "host_reveal_hint" }));
+      document.getElementById("host-btn-end-round").addEventListener("click", () => sendAction({ type: "host_end_round" }));
+      document.getElementById("host-btn-finish").addEventListener("click", () => { sendAction({ type: "host_finish_game" }); document.getElementById("modal-host").classList.add("hidden"); });
+      document.getElementById("host-player-manage-list").addEventListener("click", (e) => {
+        const adj = e.target.closest("[data-adj]"); if (adj) { sendAction({ type: "host_adjust_score", playerId: adj.dataset.adj, delta: Number(adj.dataset.delta) }); return; }
+        const kick = e.target.closest("[data-kick]"); if (kick) sendAction({ type: "host_kick_player", playerId: kick.dataset.kick });
+      });
+      app.tickTimer = setInterval(updateTimerDisplay, 250);
+      renderApp();
+    }
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+
+</body>
+</html>
