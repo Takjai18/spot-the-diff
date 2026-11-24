@@ -636,7 +636,11 @@ export default {
       });
     }
     if (url.pathname === "/ws" || url.pathname.startsWith("/room/")) {
-      const roomCode = sanitizeText(url.searchParams.get("room") || url.pathname.replace("/room/", ""), 8).toUpperCase();
+      const fromQuery = sanitizeText(url.searchParams.get("room") || "", 8).toUpperCase();
+      const fromPath = url.pathname.startsWith("/room/")
+        ? sanitizeText(url.pathname.slice("/room/".length).split("/")[0], 8).toUpperCase()
+        : "";
+      const roomCode = fromQuery || fromPath;
       if (!roomCode) {
         return new Response(JSON.stringify({ error: "Missing room code" }), {
           status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
